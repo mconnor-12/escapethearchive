@@ -43,16 +43,16 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .btn-gold:disabled{background:var(--sm);cursor:not-allowed;}
 .btn-ghost{font-family:'JetBrains Mono',monospace;font-size:0.78rem;letter-spacing:0.1em;color:var(--sm);background:transparent;border:0.5px solid rgba(122,112,96,0.3);padding:0.8rem 1.4rem;cursor:pointer;transition:all 0.2s ease;}
 .btn-ghost:hover{border-color:var(--sm);color:var(--pd);}
-.btn-task{width:100%;margin-top:0.5rem;background:transparent;border:0.5px solid rgba(201,152,42,0.2);color:var(--pd);font-family:'Crimson Pro',serif;font-size:0.8rem;padding:0.4rem 0.7rem;cursor:pointer;transition:all 0.2s;text-align:left;}
-.btn-task:hover{border-color:rgba(201,152,42,0.5);color:var(--pa);}
+.btn-task{width:100%;margin-top:0.6rem;background:rgba(201,152,42,0.1);border:1px solid rgba(201,152,42,0.35);color:var(--pa);font-family:'Crimson Pro',serif;font-size:0.88rem;padding:0.55rem 0.9rem;cursor:pointer;transition:all 0.2s;text-align:center;letter-spacing:0.03em;}
+.btn-task:hover{background:rgba(201,152,42,0.2);border-color:rgba(201,152,42,0.6);color:var(--iv);}
 .input-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.15em;color:var(--gi);text-transform:uppercase;display:block;margin-bottom:0.4rem;}
-.arch-input,.arch-select{width:100%;background:rgba(14,31,22,0.8);border:0.5px solid rgba(201,152,42,0.22);color:var(--pa);font-family:'Crimson Pro',serif;font-size:1rem;padding:0.55rem 0.85rem;outline:none;transition:border-color 0.2s;}
-.arch-input:focus,.arch-select:focus{border-color:rgba(201,152,42,0.55);}
-.arch-input::placeholder{color:var(--sm);font-style:italic;}
+.arch-input,.arch-select{width:100%;background:rgba(14,31,22,0.85);border:1px solid rgba(201,152,42,0.28);color:var(--pa);font-family:'Crimson Pro',serif;font-size:0.92rem;padding:0.55rem 0.8rem;outline:none;transition:border-color 0.2s;box-sizing:border-box;}
+.arch-input:focus,.arch-select:focus{border-color:rgba(201,152,42,0.6);}
+.arch-input::placeholder{color:rgba(200,190,160,0.42);font-style:italic;font-size:0.85rem;}
 .arch-select option{background:var(--gv);}
-.arch-textarea{width:100%;background:rgba(14,31,22,0.8);border:0.5px solid rgba(201,152,42,0.2);color:var(--pa);font-family:'Crimson Pro',serif;font-size:0.85rem;padding:0.6rem;min-height:68px;outline:none;resize:vertical;line-height:1.65;}
-.arch-textarea::placeholder{color:var(--sm);font-style:italic;}
-.arch-textarea:focus{border-color:rgba(201,152,42,0.5);}
+.arch-textarea{width:100%;background:rgba(14,31,22,0.85);border:1px solid rgba(201,152,42,0.25);color:var(--pa);font-family:'Crimson Pro',serif;font-size:0.92rem;padding:0.7rem 0.8rem;min-height:72px;outline:none;resize:vertical;line-height:1.7;box-sizing:border-box;}
+.arch-textarea::placeholder{color:rgba(200,190,160,0.45);font-style:italic;font-size:0.85rem;}
+.arch-textarea:focus{border-color:rgba(201,152,42,0.6);background:rgba(14,31,22,0.95);}
 .landing-bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 60% 50% at 50% 60%,rgba(30,61,42,0.8),transparent 70%),var(--gd);}
 
 /* ===================== LANDING ===================== */
@@ -137,6 +137,22 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .hdr-role-badge.evidence{background:var(--evid-bg);color:var(--evid-c);border:0.5px solid rgba(74,138,114,0.3);}
 .hdr-role-badge.analyst{background:var(--anal-bg);color:var(--anal-c);border:0.5px solid rgba(122,106,170,0.3);}
 .hdr-role-badge.signal{background:var(--smon-bg);color:var(--smon-c);border:0.5px solid rgba(160,104,48,0.3);}
+
+/* ── Next Room button -- hidden until both locks open ─── */
+.hdr-next-btn{
+  display:none;
+  font-family:'IM Fell English SC',serif;font-size:0.78rem;letter-spacing:0.08em;
+  background:var(--go);color:#0e1a0e;border:none;
+  padding:0.38rem 1rem;cursor:pointer;
+  animation:pulse-gold 1.8s ease-in-out infinite;
+  white-space:nowrap;
+}
+.hdr-next-btn.visible{display:flex;align-items:center;gap:0.4rem;}
+.hdr-next-btn:hover{background:var(--gb);}
+@keyframes pulse-gold{
+  0%,100%{box-shadow:0 0 0 0 rgba(201,152,42,0);}
+  50%{box-shadow:0 0 0 5px rgba(201,152,42,0.35);}
+}
 .pip-row{display:flex;align-items:center;gap:4px;}
 .pip{width:22px;height:3px;background:rgba(201,152,42,0.1);border-radius:1px;transition:background 0.4s;}
 .pip.done{background:var(--gi);}.pip.active{background:var(--go);}
@@ -151,10 +167,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .game-body{display:grid;grid-template-columns:210px 1fr 260px;flex:1;overflow:hidden;}
 
 /* ---- left rail ---- */
-.tool-rail{background:rgba(14,31,22,0.88);border-right:0.5px solid rgba(201,152,42,0.1);display:flex;flex-direction:column;overflow-y:auto;padding:0.6rem 0;}
-.ts{border-bottom:0.5px solid rgba(201,152,42,0.07);padding:0.6rem 0.8rem;}
+.tool-rail{background:rgba(10,24,16,0.95);border-right:1px solid rgba(201,152,42,0.14);display:flex;flex-direction:column;overflow-y:auto;padding:0.6rem 0;}
+.ts{border-bottom:0.5px solid rgba(201,152,42,0.09);padding:0.65rem 0.85rem;}
 .ts:last-child{border-bottom:none;}
-.ts-label{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.18em;color:var(--gi);text-transform:uppercase;margin-bottom:0.45rem;}
+.ts-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.16em;color:rgba(138,104,24,0.9);text-transform:uppercase;margin-bottom:0.5rem;}
 .locker-box{min-height:44px;background:rgba(14,31,22,0.5);border:0.5px solid rgba(201,152,42,0.07);padding:0.35rem;display:flex;flex-direction:column;gap:3px;}
 .locker-empty{font-family:'Crimson Pro',serif;font-style:italic;font-size:0.73rem;color:var(--sm);text-align:center;padding:0.4rem 0;}
 .locker-chip{background:rgba(30,61,42,0.6);border:0.5px solid rgba(201,152,42,0.13);padding:0.28rem 0.45rem;font-family:'Crimson Pro',serif;font-size:0.72rem;color:var(--pd);display:flex;align-items:center;gap:4px;cursor:pointer;}
@@ -260,9 +276,9 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* ---- testimony ---- */
 .testimony{background:#e8e0c8;border-left:4px solid #7a5a30;padding:1.2rem 1.4rem;max-width:560px;margin-bottom:0.7rem;display:none;font-family:'Crimson Pro',serif;}
 .testimony.visible{display:block;}
-.testy-hdr{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.15em;color:#5a4030;text-transform:uppercase;margin-bottom:0.65rem;}
-.testy-body{font-size:0.87rem;color:#2c2018;line-height:1.73;font-style:italic;}
-.testy-attr{margin-top:0.8rem;font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:0.1em;color:#7a5a30;}
+.testy-hdr{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.12em;color:#7a5a30;text-transform:uppercase;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:0.5px solid rgba(106,80,48,0.25);}
+.testy-body{font-size:0.92rem;color:#2a1e10;line-height:1.82;font-style:italic;margin-bottom:0.5rem;}
+.testy-attr{margin-top:0.75rem;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.08em;color:#7a5a30;line-height:1.6;}
 
 /* ---- rewrite ---- */
 .rewrite-block{max-width:560px;margin-bottom:1rem;display:none;}
@@ -281,20 +297,21 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .rp{font-family:'Crimson Pro',serif;font-size:0.85rem;color:var(--pd);font-style:italic;margin-bottom:0.45rem;}
 
 /* ---- right task panel ---- */
-.task-panel{background:rgba(14,31,22,0.52);border-left:0.5px solid rgba(201,152,42,0.08);display:flex;flex-direction:column;overflow-y:auto;padding:0.8rem;}
-.tp-hdr{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.18em;color:var(--gi);text-transform:uppercase;margin-bottom:0.75rem;padding-bottom:0.55rem;border-bottom:0.5px solid rgba(201,152,42,0.08);}
-.task{background:rgba(21,43,30,0.48);border:0.5px solid rgba(201,152,42,0.07);padding:0.65rem;margin-bottom:0.5rem;}
-.task.done{border-color:rgba(74,138,114,0.26);background:rgba(74,138,114,0.05);}
+.task-panel{background:rgba(10,24,16,0.96);border-left:1px solid rgba(201,152,42,0.14);display:flex;flex-direction:column;overflow-y:auto;padding:0.85rem;}
+.tp-hdr{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.15em;color:rgba(138,104,24,0.95);text-transform:uppercase;margin-bottom:0.8rem;padding-bottom:0.6rem;border-bottom:1px solid rgba(201,152,42,0.15);}
+.task{background:rgba(21,43,30,0.55);border:0.5px solid rgba(201,152,42,0.1);padding:0.7rem;margin-bottom:0.5rem;}
+.task.done{border-color:rgba(74,138,114,0.4);background:rgba(74,138,114,0.07);}
 .task.hidden{display:none;}
-.task-num{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--gi);letter-spacing:0.1em;margin-bottom:0.28rem;}
-.task-desc{font-family:'Crimson Pro',serif;font-size:0.78rem;color:var(--pd);line-height:1.48;}
+.task-num{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(138,104,24,0.8);letter-spacing:0.1em;margin-bottom:0.3rem;}
+.task-desc{font-family:'Crimson Pro',serif;font-size:0.82rem;color:var(--pd);line-height:1.52;}
 .task.done .task-desc{color:var(--vd);}
-.lock-box{margin-top:auto;padding:0.75rem;background:rgba(14,31,22,0.8);border:0.5px solid rgba(201,152,42,0.12);}
-.lb-title{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.15em;color:var(--gi);text-transform:uppercase;margin-bottom:0.55rem;text-align:center;}
-.lb-item{display:flex;align-items:center;gap:6px;padding:0.4rem;margin-bottom:0.3rem;background:rgba(14,31,22,0.5);border:0.5px solid rgba(201,152,42,0.07);}
-.lb-badge{width:17px;height:17px;border:1px solid rgba(201,152,42,0.26);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--gi);flex-shrink:0;}
-.lb-badge.open{border-color:var(--vd);color:var(--vd);}
-.lb-desc{font-family:'Crimson Pro',serif;font-size:0.72rem;color:var(--pd);}
+.lock-box{margin-top:auto;padding:0.9rem;background:rgba(8,18,12,0.98);border:1px solid rgba(201,152,42,0.25);}
+.lb-title{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;color:rgba(201,152,42,0.85);text-transform:uppercase;margin-bottom:0.65rem;text-align:center;}
+.lb-item{display:flex;align-items:flex-start;gap:8px;padding:0.5rem;margin-bottom:0.4rem;background:rgba(14,31,22,0.6);border:1px solid rgba(201,152,42,0.12);}
+.lb-item.unlocked{background:rgba(74,138,114,0.1);border-color:rgba(74,138,114,0.4);}
+.lb-badge{width:20px;height:20px;border:1.5px solid rgba(201,152,42,0.35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(201,152,42,0.65);flex-shrink:0;margin-top:1px;}
+.lb-badge.open{border-color:var(--vd);color:var(--vd);background:rgba(74,138,114,0.18);}
+.lb-desc{font-family:'Crimson Pro',serif;font-size:0.8rem;color:var(--pd);line-height:1.5;}
 
 /* ---- room complete ---- */
 #screen-r1-complete{align-items:center;justify-content:center;padding:2rem;}
@@ -342,38 +359,38 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* ── Task cards -- clear visual hierarchy ─────────────────────── */
 .task-card{
-  max-width:600px;border:1px solid rgba(201,152,42,0.22);
-  background:rgba(14,31,22,0.55);margin-bottom:1rem;
+  max-width:620px;border:1px solid rgba(201,152,42,0.28);
+  background:rgba(14,31,22,0.6);margin-bottom:1.1rem;
   transition:border-color 0.25s;
 }
-.task-card.active{border-color:rgba(201,152,42,0.5);background:rgba(21,43,30,0.65);}
-.task-card.complete{border-color:rgba(74,138,114,0.4);background:rgba(14,31,22,0.38);}
-.task-card.complete .task-card-hdr{background:rgba(74,138,114,0.08);}
+.task-card.active{border-color:rgba(201,152,42,0.55);background:rgba(21,43,30,0.7);}
+.task-card.complete{border-color:rgba(74,138,114,0.45);background:rgba(14,31,22,0.4);}
+.task-card.complete .task-card-hdr{background:rgba(74,138,114,0.1);}
 .task-card-hdr{
-  padding:0.55rem 0.85rem;border-bottom:0.5px solid rgba(201,152,42,0.14);
-  display:flex;align-items:baseline;gap:0.6rem;flex-wrap:wrap;
-  background:rgba(201,152,42,0.04);
+  padding:0.65rem 1rem;border-bottom:1px solid rgba(201,152,42,0.18);
+  background:rgba(201,152,42,0.06);
 }
 .task-card-num{
-  font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.2em;
-  color:var(--go);text-transform:uppercase;white-space:nowrap;flex-shrink:0;
+  font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.18em;
+  color:var(--go);text-transform:uppercase;margin-bottom:0.3rem;
 }
 .task-card-title{
-  font-family:'IM Fell English SC',serif;font-size:0.88rem;color:var(--iv);flex:1;
+  font-family:'IM Fell English SC',serif;font-size:1rem;color:var(--iv);
+  line-height:1.3;margin-bottom:0.3rem;
 }
 .task-card-std{
-  font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:0.1em;
+  font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.08em;
   color:var(--gi);text-transform:uppercase;
 }
-.task-card-body{padding:0.75rem 0.85rem;}
+.task-card-body{padding:0.9rem 1rem;}
 .task-instruction{
-  font-family:'Crimson Pro',serif;font-size:0.84rem;color:var(--pd);
-  margin-bottom:0.7rem;line-height:1.55;
+  font-family:'Crimson Pro',serif;font-size:0.9rem;color:var(--pa);
+  margin-bottom:0.85rem;line-height:1.65;
 }
 .task-feedback{
-  margin-top:0.55rem;padding:0.5rem 0.65rem;
-  background:rgba(74,138,114,0.08);border-left:2px solid var(--vd);
-  font-family:'Crimson Pro',serif;font-size:0.8rem;color:var(--pa);line-height:1.5;
+  margin-top:0.6rem;padding:0.6rem 0.8rem;
+  background:rgba(74,138,114,0.1);border-left:3px solid var(--vd);
+  font-family:'Crimson Pro',serif;font-size:0.85rem;color:var(--pa);line-height:1.6;
 }
 
 /* ── Artifact sections -- distinct from task cards ─────────────── */
@@ -473,11 +490,12 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* ── Claim scaffold ───────────────────────────────────────────── */
 .claim-scaffold{display:flex;flex-direction:column;gap:0.5rem;}
 .scaffold-row{
-  border-left:2px solid rgba(201,152,42,0.3);padding-left:0.6rem;
+  border-left:2px solid rgba(201,152,42,0.4);padding-left:0.75rem;
+  margin-bottom:0.75rem;
 }
 .scaffold-label{
-  font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.12em;
-  color:var(--gi);text-transform:uppercase;margin-bottom:0.3rem;
+  font-family:'Crimson Pro',serif;font-size:0.85rem;
+  color:var(--pa);line-height:1.5;margin-bottom:0.4rem;font-style:italic;
 }
 
 /* ── Task prompt helper ───────────────────────────────────────── */
@@ -606,16 +624,39 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .sig-feature{font-family:'Crimson Pro',serif;font-size:0.82rem;color:var(--pa);}
 .sig-btns{display:flex;gap:5px;flex-shrink:0;}
 .sig-rate-btn{
-  border:0.5px solid rgba(201,152,42,0.25);background:transparent;
-  font-family:'Crimson Pro',serif;font-size:0.74rem;padding:3px 8px;
-  cursor:pointer;transition:all 0.15s;
+  border:1px solid rgba(201,152,42,0.3);background:rgba(14,31,22,0.6);
+  font-family:'Crimson Pro',serif;font-size:0.88rem;padding:6px 14px;
+  cursor:pointer;transition:all 0.15s;color:var(--pd);min-width:42px;
 }
-.sig-rate-btn.earned{color:var(--vd);}
-.sig-rate-btn.unearned{color:var(--smon-c);}
-.sig-rate-btn:hover{background:rgba(201,152,42,0.08);}
-.sig-rate-btn.selected{background:rgba(201,152,42,0.15);color:var(--go);border-color:rgba(201,152,42,0.5);}
-.sig-rate-btn:disabled{opacity:0.45;cursor:default;}
+.sig-rate-btn.earned{color:var(--vd);border-color:rgba(74,138,114,0.4);}
+.sig-rate-btn.unearned{color:var(--smon-c);border-color:rgba(192,72,40,0.35);}
+.sig-rate-btn:hover{background:rgba(201,152,42,0.12);color:var(--pa);}
+.sig-rate-btn.selected{background:rgba(201,152,42,0.18);color:var(--go);border-color:rgba(201,152,42,0.6);font-weight:bold;}
+.sig-rate-btn:disabled{opacity:0.4;cursor:default;}
 .sig-reason{grid-column:1/-1;font-size:0.73rem;font-style:italic;}
+
+/* ── Room progress checklist ─────────────────────────────────────── */
+.progress-gate {
+  max-width:620px;background:rgba(10,18,14,0.75);
+  border:1px solid rgba(201,152,42,0.2);
+  margin:0.6rem 0 1rem;padding:0.6rem 0.85rem;
+}
+.progress-gate-title {
+  font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;
+  color:var(--go);text-transform:uppercase;margin-bottom:0.5rem;
+}
+.progress-item {
+  display:flex;align-items:center;gap:0.5rem;
+  font-family:'Crimson Pro',serif;font-size:0.83rem;
+  color:var(--pd);padding:0.18rem 0;line-height:1.4;
+}
+.progress-item.done { color:var(--vd); }
+.progress-item.done .pcheck { color:var(--vd); }
+.progress-item .pcheck {
+  font-size:0.7rem;width:14px;text-align:center;
+  flex-shrink:0;color:rgba(201,152,42,0.4);
+}
+
 </style>
 </head>
 <body>
@@ -1187,7 +1228,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
             <p style="margin-top:0.55rem;padding-top:0.55rem;border-top:0.5px solid rgba(201,152,42,0.2);">The frame is already part of the source. Metadata, titles, and captions are interpretive acts, not neutral labels. You are now ready for Room 1.</p>
           </div>
           <div style="margin-top:0.85rem;display:flex;gap:0.6rem;flex-wrap:wrap;">
-            <button class="btn-ghost" id="btn-tor1" onclick="goTo('screen-room1')">Proceed to Room 1 &rarr;</button>
+            <button class="btn-ghost" id="btn-tor1" onclick="proceedToRoom1()">Proceed to Room 1 &rarr;</button>
           </div>
         </div>
 
@@ -1195,6 +1236,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     </div>
     <div class="task-panel">
       <div class="tp-hdr">Audit Checklist -- Prologue</div>
+      <div id="progress-prologue" class="progress-gate"></div>
       <div style="font-family:'Crimson Pro',serif;font-size:0.72rem;color:var(--sm);font-style:italic;padding:0.3rem 0.5rem 0.5rem;border-bottom:0.5px solid rgba(201,152,42,0.1);margin-bottom:0.4rem;">Complete all steps to proceed to Room 1.</div>
       <div class="task" id="pt1">
         <div class="task-num">STEP 1</div>
@@ -1229,6 +1271,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <div class="sbar lit" style="height:7px"></div><div class="sbar lit" style="height:10px"></div>
         <div class="sbar" style="height:13px"></div><div class="sbar" style="height:16px"></div><div class="sbar" style="height:19px"></div>
       </div></div>
+    <button class="hdr-next-btn" id="hdr-next-r1" onclick="completeRoom1()" title="Both locks open — advance to Room 2">&#10003; Room 2 &rarr;</button>
     <div class="hdr-timer" id="tmr-r1">54:00</div>
   </div>
   <div class="game-body">
@@ -1276,6 +1319,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <div id="r1-tasks">
         <!-- tasks rendered by JS based on role -->
       </div>
+      <div id="progress-room1" class="progress-gate"></div>
       <div class="lock-box">
         <div class="lb-title">Room Locks</div>
         <div class="lb-item"><div class="lb-badge" id="lb-h">H</div><div class="lb-desc">History Lock: What historical reality was this archive structuring you away from?</div></div>
@@ -1363,6 +1407,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div class="task-panel">
       <div class="tp-hdr">Audit Tasks -- Room II</div>
       <div id="r2-tasks"></div>
+      <div id="progress-room2" class="progress-gate"></div>
       <div class="lock-box">
         <div class="lb-title">Room Locks</div>
         <div class="lb-item"><div class="lb-badge" id="lb-r2-h">H</div><div class="lb-desc">History Lock: What did broadcast saturation make you believe that the evidence did not support?</div></div>
@@ -1421,6 +1466,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div class="task-panel">
       <div class="tp-hdr">Audit Tasks -- Room III</div>
       <div id="r3-tasks"></div>
+      <div id="progress-room3" class="progress-gate"></div>
       <div class="lock-box">
         <div class="lb-title">Room Locks</div>
         <div class="lb-item"><div class="lb-badge" id="lb-r3-h">H</div><div class="lb-desc">History Lock: Which claim in this room was repeated most often -- and does repetition make it true?</div></div>
@@ -1479,6 +1525,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div class="task-panel">
       <div class="tp-hdr">Audit Tasks -- Room IV</div>
       <div id="r4-tasks"></div>
+      <div id="progress-room4" class="progress-gate"></div>
       <div class="lock-box">
         <div class="lb-title">Room Locks</div>
         <div class="lb-item"><div class="lb-badge" id="lb-r4-h">H</div><div class="lb-desc">History Lock: What did the feed's ranking make appear more credible than it was?</div></div>
@@ -1537,6 +1584,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div class="task-panel">
       <div class="tp-hdr">Audit Tasks -- Room V</div>
       <div id="r5-tasks"></div>
+      <div id="progress-room5" class="progress-gate"></div>
       <div class="lock-box">
         <div class="lb-title">Final Reckoning</div>
         <div class="lb-item"><div class="lb-badge" id="lb-r5-h">H</div><div class="lb-desc">History Lock: What did the AI summary make disappear from the historical record?</div></div>
@@ -1728,7 +1776,7 @@ const S = {
   roomsComplete: 0,
   pro: { examined:false, roleTaskDone:false, misalignDone:false },
   r1:  { provDone:false, captionFlagged:false, euphDone:false, witnessUnlocked:false, finalDone:false, reflectionDone:false,
-         signalAuditDone:false, analystMapDone:false, euphCorrect:[false,false,false] }
+         signalAuditDone:false, analystMapDone:false, euphCorrect:[false,false,false], claimSubmitted:false }
 };
 let euphCount = 0;
 
@@ -2298,6 +2346,7 @@ async function startGame(){
 
     goTo('screen-prologue');
     startTimer();
+    setTimeout(() => { updateRoomProgress('prologue'); updateRoomProgress('room1'); }, 250);
 
   } catch(err) {
     console.error('startGame error:', err);
@@ -2383,6 +2432,32 @@ function applyRoleUI(){
 // TIMER
 // ========================================================
 let timerInt;
+// ── Live progress update on any input change ────────────────────────
+document.addEventListener('input', function(e) {
+  const id = e.target?.id || '';
+  // Prologue annotation fields
+  if(id === 'ann-claim' || id === 'ann-sources') updateRoomProgress('prologue');
+  // Room 1 reflection
+  if(id === 'ref-1' || id === 'ref-2') updateRoomProgress('room1');
+  // Room 2 tasks
+  if(id.startsWith('r2-') || id === 'r2-rank-reason' || id === 'r2-saturation-resp')
+    updateRoomProgress('room2');
+  // Room 3
+  if(id === 'r3-echo-finding') updateRoomProgress('room3');
+  // Room 4
+  if(id === 'r4-platform-audit' || id === 'r4-bury-reason') updateRoomProgress('room4');
+  // Room 5
+  if(id === 'r5-synthesis-audit') updateRoomProgress('room5');
+});
+
+document.addEventListener('change', function(e) {
+  const name = e.target?.name || '';
+  const id   = e.target?.id   || '';
+  if(name === 'r2conf' || id.startsWith('r2-rank')) updateRoomProgress('room2');
+  if(name === 'r3mc') updateRoomProgress('room3');
+  if(name === 'r4rank' || id.startsWith('r4-bury')) updateRoomProgress('room4');
+});
+
 function startTimer(){
   timerInt=setInterval(()=>{
     S.timer=Math.max(0,S.timer-1);
@@ -2554,6 +2629,22 @@ async function submitAnnotations() {
     response_type:'annotation', response_value:[claim, sources, flag||'(none)'].join(' | '),
     is_correct:true, signal_delta:0.5, standards_addressed:'APUSH KC-7.3.I,AS-1',
     skill_category:'Analyzing Evidence'});
+}
+
+function proceedToRoom1() {
+  if(!S.pro.examined) {
+    showToast('Annotation required','Complete the intake document annotation first.');
+    return;
+  }
+  if(!S.pro.roleTaskDone) {
+    showToast('Role task incomplete','Complete your role task (Step 2) before advancing to Room 1.');
+    return;
+  }
+  if(!S.pro.misalignDone) {
+    showToast('One more step','Click the "Find the misalignment" button to identify the key problem in this record, then proceed.');
+    return;
+  }
+  goTo('screen-room1');
 }
 
 // ── Lead Auditor: hotspot puzzle ──────────────────────────────────
@@ -3175,6 +3266,8 @@ async function submitLeadClaim() {
   }
   const fullClaim = p1 + ' // ' + p2 + ' // LIMITATION: ' + p3;
   document.getElementById('final-input').textContent = fullClaim;
+  S.r1.claimSubmitted = true;
+  updateRoomProgress('room1');
   document.getElementById('lead-claim-ok').style.display = 'block';
   document.getElementById('lead-claim-ok').innerHTML =
     '<strong>Claim recorded.</strong> Your claim names evidence, challenge, and limit. That is a defensible historical argument. Complete the reflection below to advance to Room 2.';
@@ -3205,6 +3298,7 @@ async function submitLeadClaim() {
 async function submitR1FinalInternal(val) {
   if(S.r1.finalDone) return;
   S.r1.finalDone = true;
+  S.r1.claimSubmitted = true;
   markTask('r1t5');
   document.getElementById('lb-a')?.classList.add('open');
   if(document.getElementById('lb-a')) document.getElementById('lb-a').textContent='ok';
@@ -3753,6 +3847,7 @@ function setTestimonyScale(n) {
     const btn = document.getElementById('testy-scale-'+i);
     if(btn) btn.classList.toggle('selected', i===n);
   });
+  updateRoomProgress('room1');
   const result = document.getElementById('testy-scale-result');
   if(result) {
     const msgs = {
@@ -3770,8 +3865,8 @@ function setTestimonyScale(n) {
 async function submitTestimonyTask() {
   const q1 = document.getElementById('testy-q1')?.value?.trim();
   const q2 = document.getElementById('testy-q2')?.value?.trim();
-  if(!q1 || q1.length < 10) { showToast('Required', 'Answer question 1 before saving.'); return; }
-  if(!q2 || q2.length < 10) { showToast('Required', 'Answer question 2 before saving.'); return; }
+  if(!q1 || q1.length < 15) { showToast('More detail required','Answer question 1 in at least one sentence before saving.'); return; }
+  if(!q2 || q2.length < 15) { showToast('More detail required','Answer question 2 in at least one sentence before saving.'); return; }
   if(!_testimonyScale) { showToast('Required', 'Rate your confidence change on the 1-5 scale.'); return; }
   document.getElementById('testy-task-ok').style.display = 'block';
   markTask('r1t4');
@@ -3846,7 +3941,21 @@ async function submitR1Final(){
   document.getElementById('lb-a').textContent='ok';
   earnTrajectoryAction('both_locks_open');
   setSignal(5);
-  document.getElementById('final-input').insertAdjacentHTML('afterend','<div style="background:rgba(74,138,114,0.08);border:0.5px solid rgba(74,138,114,0.26);padding:0.45rem;margin-top:0.4rem;font-family:Crimson Pro,serif;font-size:0.78rem;color:var(--vd);">Response saved. Both room locks are open. Complete the reflection before you advance -- the reflection is not a formality. It is where the room\'s argument becomes yours.</div>');
+  // Show the Next Room button in the header bar
+  const nextBtn = document.getElementById('hdr-next-r1');
+  if(nextBtn) nextBtn.classList.add('visible');
+  // Also mark the lock item as unlocked
+  document.querySelectorAll('.lb-item').forEach(el => el.classList.add('unlocked'));
+  document.getElementById('final-input').insertAdjacentHTML('afterend',`
+    <div style="background:rgba(74,138,114,0.12);border:1px solid rgba(74,138,114,0.35);padding:0.75rem 0.9rem;margin-top:0.6rem;">
+      <div style="font-family:'Crimson Pro',serif;font-size:0.88rem;color:var(--vd);margin-bottom:0.6rem;line-height:1.55;">
+        &#10003; Response saved. Both room locks are open.<br>
+        <span style="color:var(--pa);">Complete the reflection below, then use the <strong style="color:var(--go);">Room 2 → button in the top bar</strong> to advance.</span>
+      </div>
+      <button onclick="completeRoom1()" style="background:var(--go);color:#0e1a0e;border:none;font-family:'IM Fell English SC',serif;font-size:0.88rem;letter-spacing:0.08em;padding:0.5rem 1.4rem;cursor:pointer;width:100%;">
+        &#10003; Complete reflection &amp; advance to Room 2 &rarr;
+      </button>
+    </div>`);
   const finalLabels={lead:'Defensible historical claim',evidence:'Locker summary',analyst:'Structural analysis report',signal:'Signal report'};
   await post({action:'saveResponse',session_id:S.sessionId,student_name:S.studentName,room:'room1',task_id:'R1_005',task_label:finalLabels[S.role]||'Final response',response_type:'long_text',response_value:val,is_correct:true,signal_delta:1,standards_addressed:'APUSH KC-7.3.III.B',skill_category:'Argumentation'});
   // Build role-specific claim fields for saveFinal
@@ -3898,6 +4007,11 @@ async function submitR1Final(){
 }
 
 async function completeRoom1(){
+  // Gate 1: claim must be submitted first
+  if(!S.r1.claimSubmitted) {
+    showToast('Claim required','Complete and save your historical claim before advancing. Scroll up to the claim task.');
+    return;
+  }
   const r1=document.getElementById('ref-1') ? document.getElementById('ref-1').value.trim() : '';
   const r2=document.getElementById('ref-2') ? document.getElementById('ref-2').value.trim() : '';
   if(r1.length<15||r2.length<15){showToast('Reflection required','Please write a response to both reflection prompts before advancing to Room 2.');return;}
@@ -3963,10 +4077,94 @@ async function completeRoom1(){
 // ========================================================
 // HELPERS
 // ========================================================
+
+// ── Room progress checklist helpers ─────────────────────────────────
+// Updates the "Before you advance" checklist inside each room
+
+function updateRoomProgress(room) {
+  const el = document.getElementById('progress-' + room);
+  if(!el) return;
+
+  let items = [];
+
+  if(room === 'prologue') {
+    items = [
+      { done: S.pro.examined,       label: 'Annotate the intake document (Step 1)' },
+      { done: S.pro.roleTaskDone,   label: 'Complete your role puzzle (Step 2)' },
+      { done: S.pro.misalignDone,   label: 'Identify the misalignment (Step 3)' },
+    ];
+  } else if(room === 'room1') {
+    items = [
+      { done: S.r1.finalDone || S.r1.claimSubmitted, label: 'Submit your historical claim' },
+      { done: S.r1.witnessUnlocked || S.r1.analystMapDone || S.r1.signalAuditDone || S.r1.provDone,
+        label: 'Complete your role task and access testimony' },
+    ];
+    const ref1 = document.getElementById('ref-1')?.value?.trim() || '';
+    const ref2 = document.getElementById('ref-2')?.value?.trim() || '';
+    items.push({ done: ref1.length >= 15 && ref2.length >= 15, label: 'Respond to both reflection prompts' });
+  } else if(room === 'room2') {
+    const r1 = document.getElementById('r2-rank-1')?.value || '';
+    const conf = document.querySelector('input[name="r2conf"]:checked');
+    const sat  = document.getElementById('r2-saturation-resp')?.value?.trim() || '';
+    items = [
+      { done: !!r1,        label: 'Task A: Rank the sources' },
+      { done: !!conf,      label: 'Task B: Rate your confidence after reading' },
+      { done: sat.length >= 20, label: 'Task C: Name what abundance obscured' },
+    ];
+  } else if(room === 'room3') {
+    const mc   = document.querySelector('input[name="r3mc"]:checked');
+    const find = document.getElementById('r3-echo-finding')?.value?.trim() || '';
+    items = [
+      { done: echoTraced >= 3,     label: 'Examine at least 3 of 7 citation entries' },
+      { done: !!mc,                label: 'Answer the corroboration MC question' },
+      { done: find.length >= 25,   label: 'Write your echo analysis' },
+    ];
+  } else if(room === 'room4') {
+    const mc  = document.querySelector('input[name="r4rank"]:checked');
+    const br  = document.getElementById('r4-bury-reason')?.value?.trim() || '';
+    const aud = document.getElementById('r4-platform-audit')?.value?.trim() || '';
+    items = [
+      { done: !!mc,             label: 'Task A: Identify what the ranking is doing' },
+      { done: br.length >= 10,  label: 'Task B: Rank the buried sources + explain' },
+      { done: aud.length >= 25, label: 'Task C: Write your platform audit' },
+    ];
+  } else if(room === 'room5') {
+    const aud = document.getElementById('r5-synthesis-audit')?.value?.trim() || '';
+    items = [
+      { done: r5AuditsDone >= 3,   label: 'Open and audit at least 3 AI claims' },
+      { done: aud.length >= 25,    label: 'Write your synthesis audit' },
+    ];
+  }
+
+  const allDone = items.every(i => i.done);
+  el.innerHTML = `
+    <div class="progress-gate-title">${allDone ? '✓ Ready to advance' : 'Before you advance'}</div>
+    ${items.map(i => `
+      <div class="progress-item${i.done ? ' done' : ''}">
+        <span class="pcheck">${i.done ? '✓' : '○'}</span>
+        ${i.label}
+      </div>`).join('')}
+  `;
+  el.style.borderColor = allDone
+    ? 'rgba(74,138,114,0.45)'
+    : 'rgba(201,152,42,0.2)';
+}
+
+// Call updateRoomProgress whenever a form field changes or a task completes
+// Patch markTask to also update the room progress
+const _origMarkTask = window.markTask;
+
 function markTask(id){
   const el=document.getElementById(id);
   if(!el) return;
   el.classList.add('done');
+  // Update progress for current room
+  if(id.startsWith('pt')) updateRoomProgress('prologue');
+  else if(id.startsWith('r1')) updateRoomProgress('room1');
+  else if(id.startsWith('r2')) updateRoomProgress('room2');
+  else if(id.startsWith('r3')) updateRoomProgress('room3');
+  else if(id.startsWith('r4')) updateRoomProgress('room4');
+  else if(id.startsWith('r5')) updateRoomProgress('room5');
 }
 
 function showModal(tag,title,body,prin){
@@ -4484,6 +4682,7 @@ function enterRoom2() {
   goTo('screen-room2');
   showHUD('room2');
   syncDashboard();
+  setTimeout(() => updateRoomProgress('room2'), 150);
 }
 function enterRoom3() {
   post({action:'logLiveFeed', session_id:S.sessionId, student_name:S.studentName, class_period:S.period, room:'room3', event_type:'room_enter', event_label:'Entered Room 3', value:'', pts_change:0, running_total:S2.pts});
@@ -4491,6 +4690,7 @@ function enterRoom3() {
   goTo('screen-room3');
   showHUD('room3');
   syncDashboard();
+  setTimeout(() => updateRoomProgress('room3'), 150);
 }
 function enterRoom4() {
   post({action:'logLiveFeed', session_id:S.sessionId, student_name:S.studentName, class_period:S.period, room:'room4', event_type:'room_enter', event_label:'Entered Room 4', value:'', pts_change:0, running_total:S2.pts});
@@ -4498,6 +4698,7 @@ function enterRoom4() {
   goTo('screen-room4');
   showHUD('room4');
   syncDashboard();
+  setTimeout(() => updateRoomProgress('room4'), 150);
 }
 function enterRoom5() {
   post({action:'logLiveFeed', session_id:S.sessionId, student_name:S.studentName, class_period:S.period, room:'room5', event_type:'room_enter', event_label:'Entered Room 5', value:'', pts_change:0, running_total:S2.pts});
@@ -4505,6 +4706,7 @@ function enterRoom5() {
   goTo('screen-room5');
   showHUD('room5');
   syncDashboard();
+  setTimeout(() => updateRoomProgress('room5'), 150);
 }
 function enterFinal() {
   goTo('screen-final');
@@ -4757,6 +4959,7 @@ function setR2PreConf(n) {
   });
   const el = document.getElementById('r2-pre-set');
   if(el) el.textContent = ['','Low','Below average','Moderate','High','Very high'][n] + ' -- return to this after reading all six sources.';
+  updateRoomProgress('room2');
 }
 
 const _openedSources = new Set();
@@ -4924,6 +5127,7 @@ async function traceEcho(i, source) {
     echoTraced++;
     const counter = document.getElementById('echo-counter-r3');
     if(counter) counter.textContent = echoTraced + ' of 7 examined';
+    updateRoomProgress('room3');
     gainPts(8, 'Citation examined (+8)', 'analysis');
     trackSourceEncounter('r3-echo-'+i);
     await recordSaturationCheck('room3');
@@ -4933,8 +5137,12 @@ async function traceEcho(i, source) {
 async function submitRoom3() {
   const finding = document.getElementById('r3-echo-finding')?.value?.trim();
   const mcEl = document.querySelector('input[name="r3mc"]:checked');
+  if(echoTraced < 3) {
+    showToast('Examine more sources','Open at least 3 of the 7 citation entries before submitting your analysis. Click each entry to examine it.');
+    return;
+  }
   if(!mcEl) { showToast('MC answer required','Select your answer to the corroboration question before advancing.'); return; }
-  if(!finding || finding.length < 25) { showToast('Required', 'Write your echo analysis before advancing.'); return; }
+  if(!finding || finding.length < 25) { showToast('Analysis required','Write your echo analysis before advancing -- name the origin document and whether this is a citation chain.'); return; }
 
   const mc = mcEl.value;
   const isCorrect = mc === 'chain' || mc === 'mixed';
@@ -5230,6 +5438,7 @@ async function auditClaim(i, label) {
     r5AuditsDone++;
     const counter = document.getElementById('audit-counter-r5');
     if(counter) counter.textContent = r5AuditsDone + ' / 6 opened';
+    updateRoomProgress('room5');
     gainPts(10, 'AI claim opened for audit (+10)', 'synthesis');
     trackSourceEncounter('r5-claim-'+i);
     await recordSaturationCheck('room5');
@@ -5297,7 +5506,11 @@ async function saveClaimAudit(i) {
 
 async function submitRoom5() {
   const audit = document.getElementById('r5-synthesis-audit')?.value?.trim();
-  if(!audit || audit.length < 25) { showToast('Required', 'Submit your synthesis audit before the Final Protocol.'); return; }
+  if(r5AuditsDone < 3) {
+    showToast('Open more claims','Open and examine at least 3 of the 6 AI claims before submitting your synthesis audit.');
+    return;
+  }
+  if(!audit || audit.length < 25) { showToast('Synthesis required','Write your synthesis audit before the Final Protocol -- name what the AI summary submerged.'); return; }
   const notesSmoothing = audit.toLowerCase().includes('smooth') || audit.toLowerCase().includes('disappear') ||
     audit.toLowerCase().includes('hidden') || audit.toLowerCase().includes('absent') ||
     audit.toLowerCase().includes('omit') || audit.toLowerCase().includes('conceal');
