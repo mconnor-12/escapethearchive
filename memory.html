@@ -43,15 +43,15 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .btn-gold:disabled{background:var(--sm);cursor:not-allowed;}
 .btn-ghost{font-family:'JetBrains Mono',monospace;font-size:0.78rem;letter-spacing:0.1em;color:var(--sm);background:transparent;border:0.5px solid rgba(122,112,96,0.3);padding:0.8rem 1.4rem;cursor:pointer;transition:all 0.2s ease;}
 .btn-ghost:hover{border-color:var(--sm);color:var(--pd);}
-.btn-task{width:100%;margin-top:0.6rem;background:rgba(201,152,42,0.1);border:1px solid rgba(201,152,42,0.35);color:var(--pa);font-family:'Crimson Pro',serif;font-size:0.88rem;padding:0.55rem 0.9rem;cursor:pointer;transition:all 0.2s;text-align:center;letter-spacing:0.03em;}
+.btn-task{width:100%;margin-top:0.7rem;background:rgba(201,152,42,0.14);border:1px solid rgba(201,152,42,0.5);color:var(--iv);font-family:'IM Fell English SC',serif;font-size:0.95rem;padding:0.65rem 0.9rem;cursor:pointer;transition:all 0.2s;text-align:center;letter-spacing:0.04em;}
 .btn-task:hover{background:rgba(201,152,42,0.2);border-color:rgba(201,152,42,0.6);color:var(--iv);}
 .input-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.15em;color:var(--gi);text-transform:uppercase;display:block;margin-bottom:0.4rem;}
 .arch-input,.arch-select{width:100%;background:rgba(14,31,22,0.85);border:1px solid rgba(201,152,42,0.28);color:var(--pa);font-family:'Crimson Pro',serif;font-size:0.92rem;padding:0.55rem 0.8rem;outline:none;transition:border-color 0.2s;box-sizing:border-box;}
 .arch-input:focus,.arch-select:focus{border-color:rgba(201,152,42,0.6);}
 .arch-input::placeholder{color:rgba(200,190,160,0.42);font-style:italic;font-size:0.85rem;}
 .arch-select option{background:var(--gv);}
-.arch-textarea{width:100%;background:rgba(14,31,22,0.85);border:1px solid rgba(201,152,42,0.25);color:var(--pa);font-family:'Crimson Pro',serif;font-size:0.92rem;padding:0.7rem 0.8rem;min-height:72px;outline:none;resize:vertical;line-height:1.7;box-sizing:border-box;}
-.arch-textarea::placeholder{color:rgba(200,190,160,0.45);font-style:italic;font-size:0.85rem;}
+.arch-textarea{width:100%;background:rgba(8,20,14,0.92);border:1px solid rgba(201,152,42,0.35);color:#e8dfc8;font-family:'Crimson Pro',serif;font-size:0.92rem;padding:0.7rem 0.8rem;min-height:72px;outline:none;resize:vertical;line-height:1.7;box-sizing:border-box;}
+.arch-textarea::placeholder{color:rgba(200,190,160,0.5);font-style:italic;font-size:0.86rem;}
 .arch-textarea:focus{border-color:rgba(201,152,42,0.6);background:rgba(14,31,22,0.95);}
 .landing-bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 60% 50% at 50% 60%,rgba(30,61,42,0.8),transparent 70%),var(--gd);}
 
@@ -382,15 +382,24 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.08em;
   color:var(--gi);text-transform:uppercase;
 }
-.task-card-body{padding:0.9rem 1rem;}
+.task-card-body{padding:0.9rem 1rem;background:rgba(14,31,22,0.3);}
 .task-instruction{
+  font-family:'Crimson Pro',serif;font-size:0.92rem;color:var(--iv);
+  margin-bottom:0.85rem;line-height:1.65;font-weight:500;
+}
+.task-section-label{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;
+  color:var(--go);text-transform:uppercase;margin-bottom:0.45rem;
+}
+.task-section-q{
   font-family:'Crimson Pro',serif;font-size:0.9rem;color:var(--pa);
-  margin-bottom:0.85rem;line-height:1.65;
+  line-height:1.6;margin-bottom:0.5rem;font-weight:500;
 }
 .task-feedback{
-  margin-top:0.6rem;padding:0.6rem 0.8rem;
-  background:rgba(74,138,114,0.1);border-left:3px solid var(--vd);
-  font-family:'Crimson Pro',serif;font-size:0.85rem;color:var(--pa);line-height:1.6;
+  margin-top:0.7rem;padding:0.7rem 0.9rem;
+  background:rgba(74,138,114,0.12);border-left:3px solid var(--vd);
+  font-family:'Crimson Pro',serif;font-size:0.88rem;color:var(--iv);line-height:1.65;
+  font-style:italic;
 }
 
 /* ── Artifact sections -- distinct from task cards ─────────────── */
@@ -490,12 +499,13 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* ── Claim scaffold ───────────────────────────────────────────── */
 .claim-scaffold{display:flex;flex-direction:column;gap:0.5rem;}
 .scaffold-row{
-  border-left:2px solid rgba(201,152,42,0.4);padding-left:0.75rem;
-  margin-bottom:0.75rem;
+  border-left:3px solid rgba(201,152,42,0.45);padding-left:0.8rem;
+  margin-bottom:0.85rem;
 }
 .scaffold-label{
-  font-family:'Crimson Pro',serif;font-size:0.85rem;
-  color:var(--pa);line-height:1.5;margin-bottom:0.4rem;font-style:italic;
+  font-family:'Crimson Pro',serif;font-size:0.9rem;font-style:normal;
+  font-weight:600;color:#1a1208;line-height:1.5;margin-bottom:0.45rem;
+  text-transform:none;letter-spacing:normal;
 }
 
 /* ── Task prompt helper ───────────────────────────────────────── */
@@ -624,9 +634,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .sig-feature{font-family:'Crimson Pro',serif;font-size:0.82rem;color:var(--pa);}
 .sig-btns{display:flex;gap:5px;flex-shrink:0;}
 .sig-rate-btn{
-  border:1px solid rgba(201,152,42,0.3);background:rgba(14,31,22,0.6);
-  font-family:'Crimson Pro',serif;font-size:0.88rem;padding:6px 14px;
-  cursor:pointer;transition:all 0.15s;color:var(--pd);min-width:42px;
+  border:1px solid rgba(201,152,42,0.4);background:rgba(8,20,14,0.85);
+  font-family:'IM Fell English SC',serif;font-size:1.05rem;padding:8px 16px;
+  cursor:pointer;transition:all 0.15s;color:var(--pa);min-width:48px;
+  font-weight:normal;
 }
 .sig-rate-btn.earned{color:var(--vd);border-color:rgba(74,138,114,0.4);}
 .sig-rate-btn.unearned{color:var(--smon-c);border-color:rgba(192,72,40,0.35);}
@@ -2624,6 +2635,7 @@ async function submitAnnotations() {
 
   _advanceStep(1, 2);
 
+  checkVocabBonus(claim + ' ' + sources, 'prologue');
   await post({action:'saveResponse', session_id:S.sessionId, student_name:S.studentName,
     room:'prologue', task_id:'PROL_001', task_label:'Intake document annotation',
     response_type:'annotation', response_value:[claim, sources, flag||'(none)'].join(' | '),
@@ -3267,6 +3279,7 @@ async function submitLeadClaim() {
   const fullClaim = p1 + ' // ' + p2 + ' // LIMITATION: ' + p3;
   document.getElementById('final-input').textContent = fullClaim;
   S.r1.claimSubmitted = true;
+  checkVocabBonus(p1 + ' ' + p2 + ' ' + p3, 'room1');
   updateRoomProgress('room1');
   document.getElementById('lead-claim-ok').style.display = 'block';
   document.getElementById('lead-claim-ok').innerHTML =
@@ -3299,6 +3312,7 @@ async function submitR1FinalInternal(val) {
   if(S.r1.finalDone) return;
   S.r1.finalDone = true;
   S.r1.claimSubmitted = true;
+  checkVocabBonus(val, 'room1');
   markTask('r1t5');
   document.getElementById('lb-a')?.classList.add('open');
   if(document.getElementById('lb-a')) document.getElementById('lb-a').textContent='ok';
@@ -3829,9 +3843,9 @@ function testimonyHTML(){
         <div class="scaffold-row" style="margin-bottom:0.55rem;">
           <div class="scaffold-label">Rate: on a scale of 1&ndash;5, how much does this testimony change your confidence in the official record? (1 = no change, 5 = changes everything)</div>
           <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.3rem;">
-            ${[1,2,3,4,5].map(n=>`<button class="sig-rate-btn" id="testy-scale-${n}" onclick="setTestimonyScale(${n})" style="width:36px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;">${n}</button>`).join('')}
+            ${[1,2,3,4,5].map(n=>`<button class="sig-rate-btn" id="testy-scale-${n}" onclick="setTestimonyScale(${n})">${n}</button>`).join('')}
           </div>
-          <div id="testy-scale-result" style="font-family:'Crimson Pro',serif;font-size:0.75rem;color:var(--vd);font-style:italic;margin-top:0.25rem;display:none;"></div>
+          <div id="testy-scale-result" style="font-family:'Crimson Pro',serif;font-size:0.88rem;color:var(--vd);font-style:italic;margin-top:0.5rem;line-height:1.55;display:none;padding:0.4rem 0.6rem;background:rgba(74,138,114,0.08);border-left:2px solid var(--vd);"></div>
         </div>
 
         <button class="btn-task" style="margin-top:0.3rem;" onclick="submitTestimonyTask()">Save testimony analysis</button>
@@ -3868,6 +3882,7 @@ async function submitTestimonyTask() {
   if(!q1 || q1.length < 15) { showToast('More detail required','Answer question 1 in at least one sentence before saving.'); return; }
   if(!q2 || q2.length < 15) { showToast('More detail required','Answer question 2 in at least one sentence before saving.'); return; }
   if(!_testimonyScale) { showToast('Required', 'Rate your confidence change on the 1-5 scale.'); return; }
+  checkVocabBonus(q1 + ' ' + q2, 'room1');
   document.getElementById('testy-task-ok').style.display = 'block';
   markTask('r1t4');
   gainPts(25, 'Testimony analysis complete (+25)', 'analysis');
@@ -4222,6 +4237,76 @@ const AS = {
 // V4 OBJECTS (48 total, journey-shifting)
 // ================================================================
 const OBJECTS = {
+  // -- Category V: Vocabulary Recognition (awarded for precise historical language) --
+  // These appear in the discovery toast as "LEXICON ENTRY" -- not revealed in howToFind
+  // so students don't game them. Each has a downstream effect.
+
+  vocab_disavowal: {icon:'&#128220;',name:'Lexicon Entry: Disavowal',cat:'V',pts:35,ink:'indigo',
+    desc:'You used the word disavowal precisely. In archival politics, disavowal names the condition of knowing the record and proceeding anyway.',
+    effect:'In Room 5: the AI synthesis audit unlocks a pre-labeled disavowal flag on Claim 3.',
+    journeyEffect:'r5_disavowal_flag',
+    howToFind:'Used precise analytical language in your written work.',roles:null},
+
+  vocab_provenance: {icon:'&#128220;',name:'Lexicon Entry: Provenance',cat:'V',pts:30,ink:'sepia',
+    desc:'You used the word provenance -- the chain of custody, origin, and handling history of a document.',
+    effect:'In Room 3: one citation entry auto-expands its full provenance chain.',
+    journeyEffect:'r3_provenance_expanded',
+    howToFind:'Used precise analytical language in your written work.',roles:null},
+
+  vocab_corroboration: {icon:'&#128220;',name:'Lexicon Entry: Corroboration',cat:'V',pts:30,ink:'gold',
+    desc:'You distinguished corroboration from repetition -- the key question of Room 3.',
+    effect:'In Room 3: the MC feedback includes an extended historiographical note on the Tet debate.',
+    journeyEffect:'r3_extended_mc_note',
+    howToFind:'Used precise analytical language in your written work.',roles:null},
+
+  vocab_saturation: {icon:'&#128220;',name:'Lexicon Entry: Saturation',cat:'V',pts:25,ink:'vd',
+    desc:'You named saturation as an epistemic condition -- not just "too many sources" but a specific effect on judgment.',
+    effect:'In Room 4: one additional buried source becomes visible in the feed.',
+    journeyEffect:'r4_buried_revealed',
+    howToFind:'Used precise analytical language in your written work.',roles:null},
+
+  vocab_euphemism: {icon:'&#128220;',name:'Lexicon Entry: Euphemism',cat:'V',pts:25,ink:'gold',
+    desc:'You named the mechanism of euphemistic language -- not just the wrong word, but the function the word performs.',
+    effect:'Unlocks an optional extended decoder task with two additional WRA terms.',
+    journeyEffect:'euph_decoder_extended',
+    howToFind:'Used precise analytical language in your written work.',roles:null},
+
+  vocab_omission: {icon:'&#128220;',name:'Lexicon Entry: Structural Omission',cat:'V',pts:30,ink:'sepia',
+    desc:'You distinguished structural omission from accidental absence -- naming the archive\u2019s design, not its oversight.',
+    effect:'In Room 2: one source card reveals a suppression note in its provenance trail.',
+    journeyEffect:'r2_suppression_note',
+    howToFind:'Used precise analytical language in your written work.',roles:null},
+
+  vocab_affect: {icon:'&#128220;',name:'Lexicon Entry: Affective Authority',cat:'V',pts:35,ink:'indigo',
+    desc:'You named how emotional register -- the calm, the official tone, the affect of authority -- produces trust before content is read.',
+    effect:'In Room 5: a pre-labeled trust-signal flag appears on AI Claim 1.',
+    journeyEffect:'r5_affect_flag',
+    howToFind:'Used precise analytical language in your written work.',roles:null},
+
+  vocab_palimpsest: {icon:'&#128220;',name:'Lexicon Entry: Palimpsest',cat:'V',pts:50,ink:'indigo',
+    desc:'You used palimpsest -- a layered document in which earlier inscriptions remain active beneath later ones. Rare for an 11th grader.',
+    effect:'Unlocks a bonus Room 3 inscription -- a suppressed source that surfaces when you know what to look for.',
+    journeyEffect:'r3_palimpsest_source',
+    howToFind:'Used precise analytical language in your written work.',roles:null},
+
+  vocab_dissonance: {icon:'&#128220;',name:'Lexicon Entry: Cognitive Dissonance',cat:'V',pts:30,ink:'sepia',
+    desc:'You named the psychological condition of holding contradictory evidence -- a signal that the archive is making you work.',
+    effect:'Adds a self-audit prompt to your final protocol reflection.',
+    journeyEffect:'final_self_audit',
+    howToFind:'Used precise analytical language in your written work.',roles:null},
+
+  vocab_agency: {icon:'&#128220;',name:'Lexicon Entry: Historical Agency',cat:'V',pts:25,ink:'gold',
+    desc:'You named agency precisely in a historical context -- asking who could act, under what constraints, and with what consequences.',
+    effect:'In Room 2: the VVAW source card reveals an additional footnote on testimony and authorization.',
+    journeyEffect:'r2_vvaw_footnote',
+    howToFind:'Used precise analytical language in your written work.',roles:null},
+
+  vocab_framing: {icon:'&#128220;',name:'Lexicon Entry: Framing',cat:'V',pts:25,ink:'vd',
+    desc:'You used framing analytically -- naming how the presentation of a source shapes what it appears to mean before it is read.',
+    effect:'Reveals a framing analysis layer on Artifact 003 (the WRA photograph).',
+    journeyEffect:'r1_framing_layer',
+    howToFind:'Used precise analytical language in your written work.',roles:null},
+
   // -- Category A: Archivist Tools --
   archivist_bag:    {icon:'&#128197;',name:"Archivist's Bag",cat:'A',pts:30,ink:'gold',desc:'A worn leather satchel near the intake desk. Expands locker by 3 slots.',effect:'Locker +3 slots. One one additional artifact that carries forward to Room 5.',journeyEffect:'bag_expanded',howToFind:'Examine the intake desk surface before any task.',roles:null},
   magnifying_lens:  {icon:'&#128269;',name:'Magnifying Lens',cat:'A',pts:25,ink:'gold',desc:'A brass magnifying glass. Reveals hidden metadata.',effect:'Reveals hidden provenance fields on any artifact.',journeyEffect:'metadata_visible',howToFind:'Read full provenance on Artifact 002 before saving.',roles:null},
@@ -4577,6 +4662,128 @@ function updateRankBadge(rank) {
 // ================================================================
 // V4 OBJECT DISCOVERY
 // ================================================================
+// ================================================================
+// VOCABULARY RECOGNITION ENGINE
+// Scans student free-text for precise historical/analytical terms.
+// Only fires once per term per student session.
+// Placed selectively -- not on every question, only where the term
+// would represent genuine analytical insight, not guessing.
+// ================================================================
+
+const _vocabAwarded = new Set(); // track what's already been given
+
+const VOCAB_TRIGGERS = {
+  // term_id: { words: [array of exact/partial matches], object: 'vocab_xxx',
+  //            context: 'hint shown in toast about what they said' }
+
+  disavowal: {
+    words: ['disavowal','disavow','knew but','knowing well','knowing and proceeding','knowing but'],
+    object: 'vocab_disavowal',
+    context: 'You named disavowal — the condition of knowing the record and proceeding anyway.'
+  },
+  provenance: {
+    words: ['provenance','chain of custody','custody chain','who handled','source origin','original context'],
+    object: 'vocab_provenance',
+    context: 'You used provenance — the history of how a document moved through hands and institutions.'
+  },
+  corroboration: {
+    words: ['corroboration','corroborate','independent verification','independent sources','independent confirm'],
+    object: 'vocab_corroboration',
+    context: 'You distinguished corroboration from repetition — that’s the analytical move Room 3 is built on.'
+  },
+  saturation: {
+    words: ['saturation','saturate','information overload','too much information','abundance of sources','overwhelm'],
+    object: 'vocab_saturation',
+    context: 'You named saturation as an epistemic condition — not just volume, but what volume does to judgment.'
+  },
+  euphemism: {
+    words: ['euphemism','euphemistic','sanitized language','sanitize','language choice','word choice obscures','language does work','language makes'],
+    object: 'vocab_euphemism',
+    context: 'You named euphemism as a mechanism -- not just a wrong word, but a function the language performs.'
+  },
+  omission: {
+    words: ['structural omission','structurally excluded','structural absence','designed to exclude','by design','archive was designed','built to exclude','whose voice','whose experience'],
+    object: 'vocab_omission',
+    context: 'You distinguished structural omission from accidental absence -- naming a design, not an oversight.'
+  },
+  affect: {
+    words: ['affect','affective','emotional register','tone of authority','calm of the document','official tone','bureaucratic calm','trust before reading','feel trustworthy'],
+    object: 'vocab_affect',
+    context: 'You named affect — how emotional register produces trust before content is even read.'
+  },
+  palimpsest: {
+    words: ['palimpsest','layered','earlier inscription','overwritten','traces beneath','beneath the surface','what was there before'],
+    object: 'vocab_palimpsest',
+    context: 'You used palimpsest -- layered documents where earlier inscriptions remain active. Rare for an 11th grader.'
+  },
+  dissonance: {
+    words: ['cognitive dissonance','dissonance','contradictory evidence','contradiction','cannot reconcile','holds two things','simultaneously true'],
+    object: 'vocab_dissonance',
+    context: 'You named cognitive dissonance — the condition of holding contradictory evidence. That’s doing real historical work.'
+  },
+  agency: {
+    words: ['historical agency','agency','who could act','constrained by','conditions of','under what conditions','what was possible'],
+    object: 'vocab_agency',
+    context: 'You used agency precisely — asking who could act, under what constraints, and with what consequences.'
+  },
+  framing: {
+    words: ['framing','frame the source','how it is framed','framed as','presentation shapes','the frame','frame itself','shapes meaning'],
+    object: 'vocab_framing',
+    context: 'You named framing analytically — how presentation shapes meaning before content is read.'
+  }
+};
+
+function checkVocabBonus(text, room) {
+  if(!text || text.length < 8) return;
+  const lower = text.toLowerCase();
+
+  Object.entries(VOCAB_TRIGGERS).forEach(([termId, trigger]) => {
+    // Only award once per session per term
+    if(_vocabAwarded.has(termId)) return;
+
+    const matched = trigger.words.some(w => lower.includes(w));
+    if(!matched) return;
+
+    // Don't award if object already in bag
+    if(S2.inventory[trigger.object]) return;
+
+    // Award it
+    _vocabAwarded.add(termId);
+
+    // Small delay so it appears after main save toast
+    setTimeout(() => {
+      discoverObject(trigger.object, true); // skipToast = true, we show our own
+      _showVocabDiscovery(trigger.object, trigger.context);
+      post({action:'saveResponse', session_id:S.sessionId, student_name:S.studentName,
+        class_period:S.period, room:room,
+        task_id:'VOCAB_'+termId.toUpperCase(),
+        task_label:'Vocabulary recognition: '+termId,
+        response_type:'vocab_trigger',
+        response_value:text.substring(0, 200),
+        is_correct:true, signal_delta:0,
+        standards_addressed:'HS-1,AS-2',
+        skill_category:'Analytical Vocabulary'});
+    }, 900);
+  });
+}
+
+function _showVocabDiscovery(objId, context) {
+  const obj = OBJECTS[objId];
+  if(!obj) return;
+
+  // Use a distinctive toast style for vocab discoveries
+  const toast = document.getElementById('disc-toast');
+  if(toast) {
+    document.getElementById('dt-icon').innerHTML = '&#128220;';
+    document.getElementById('dt-label').textContent = 'Lexicon Entry Discovered';
+    document.getElementById('dt-name').textContent = obj.name;
+    document.getElementById('dt-desc').textContent = context;
+    document.getElementById('dt-effect').textContent = 'Bag effect: '+obj.effect;
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 6000);
+  }
+}
+
 function discoverObject(objId, skipToast) {
   if(S2.inventory[objId]) return;
   const obj = OBJECTS[objId];
@@ -4789,7 +4996,7 @@ function buildRoom2Content(role) {
       <div style="font-family:'Crimson Pro',serif;font-size:0.82rem;color:var(--pd);font-style:italic;margin-bottom:0.5rem;">Before opening any source: rate your current confidence (1=low, 5=high) that you understand what happened in Vietnam 1965-1975.</div>
       <div style="display:flex;gap:0.4rem;margin-bottom:0.85rem;align-items:center;">
         <span style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--gi);text-transform:uppercase;">Pre-reading confidence:</span>
-        ${[1,2,3,4,5].map(n=>`<button class="sig-rate-btn" id="r2-pre-${n}" onclick="setR2PreConf(${n})" style="width:32px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;">${n}</button>`).join('')}
+        ${[1,2,3,4,5].map(n=>`<button class="sig-rate-btn" id="r2-pre-${n}" onclick="setR2PreConf(${n})">${n}</button>`).join('')}
         <span id="r2-pre-set" style="font-family:'Crimson Pro',serif;font-size:0.75rem;color:var(--gi);font-style:italic;margin-left:0.4rem;"></span>
       </div>
 
@@ -4845,8 +5052,8 @@ function buildRoom2Content(role) {
 
         <!-- Task A: Source ranking -->
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--go);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.3rem;">Task A &mdash; Rank the sources</div>
-          <div style="font-family:'Crimson Pro',serif;font-size:0.82rem;color:var(--pd);margin-bottom:0.45rem;">Which of the six sources would you weight most heavily in constructing a historical claim about the Vietnam War? Rank your top three and explain each choice.</div>
+          <div class="task-section-label">Task A &mdash; Rank the sources</div>
+          <div class="task-section-q">Which of the six sources would you weight most heavily in constructing a historical claim about the Vietnam War? Rank your top three and explain each choice.</div>
           <div style="display:flex;flex-direction:column;gap:0.25rem;margin-bottom:0.35rem;" id="r2-rank-choices">
             <select class="arch-select" id="r2-rank-1" style="font-size:0.78rem;"><option value="">1st most important source...</option><option>Cronkite CBS editorial (1968)</option><option>AP wire photo caption (1968)</option><option>Pentagon Papers / NYT (1971)</option><option>NSC "Progress" memo (1966)</option><option>VVAW Winter Soldier testimony (1971)</option><option>Textbook synthesis (1987)</option></select>
             <select class="arch-select" id="r2-rank-2" style="font-size:0.78rem;"><option value="">2nd most important source...</option><option>Cronkite CBS editorial (1968)</option><option>AP wire photo caption (1968)</option><option>Pentagon Papers / NYT (1971)</option><option>NSC "Progress" memo (1966)</option><option>VVAW Winter Soldier testimony (1971)</option><option>Textbook synthesis (1987)</option></select>
@@ -4857,8 +5064,8 @@ function buildRoom2Content(role) {
 
         <!-- Task B: MC confidence check -->
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--go);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.3rem;">Task B &mdash; Confidence after reading</div>
-          <div style="font-family:'Crimson Pro',serif;font-size:0.82rem;color:var(--pd);margin-bottom:0.35rem;">You rated your pre-reading confidence earlier. Which best describes your confidence <em>now</em>?</div>
+          <div class="task-section-label">Task B &mdash; Confidence after reading</div>
+          <div class="task-section-q">You rated your pre-reading confidence earlier. Which best describes your confidence <em>now</em>?</div>
           <div style="display:flex;flex-direction:column;gap:0.25rem;" id="r2-conf-mc">
             <label style="display:flex;align-items:center;gap:0.5rem;font-family:'Crimson Pro',serif;font-size:0.8rem;color:var(--pd);cursor:pointer;"><input type="radio" name="r2conf" value="more"> More certain &mdash; more sources = more confidence</label>
             <label style="display:flex;align-items:center;gap:0.5rem;font-family:'Crimson Pro',serif;font-size:0.8rem;color:var(--pd);cursor:pointer;"><input type="radio" name="r2conf" value="less"> Less certain &mdash; the sources contradict each other or raise new questions</label>
@@ -4870,8 +5077,8 @@ function buildRoom2Content(role) {
 
         <!-- Task C: Saturation statement -->
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--go);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.3rem;">Task C &mdash; Name what abundance obscured</div>
-          <div style="font-family:'Crimson Pro',serif;font-size:0.82rem;color:var(--pd);margin-bottom:0.35rem;">Name one thing the abundance of sources obscured rather than clarified. This is not about what you did not understand &mdash; it is about what the <em>quantity itself</em> made harder to see.</div>
+          <div class="task-section-label">Task C &mdash; Name what abundance obscured</div>
+          <div class="task-section-q">Name one thing the abundance of sources obscured rather than clarified. This is not about what you did not understand &mdash; it is about what the <em>quantity itself</em> made harder to see.</div>
           <textarea class="arch-textarea" id="r2-saturation-resp" style="min-height:52px;" placeholder="Abundance obscured... because having more sources made it harder to..."></textarea>
         </div>
 
@@ -4995,6 +5202,7 @@ async function submitRoom2() {
   };
   if(confFb) { confFb.textContent = confMessages[conf] || ''; confFb.style.display = 'block'; }
 
+  checkVocabBonus(satResp + ' ' + (reason||''), 'room2');
   const recognized = conf === 'less' || conf === 'uncertain' ||
     satResp.toLowerCase().includes('obscur') || satResp.toLowerCase().includes('harder');
   if(recognized) {
@@ -5155,6 +5363,7 @@ async function submitRoom3() {
   };
   if(fbEl) { fbEl.textContent = feedbacks[mc] || ''; fbEl.style.display = 'block'; }
 
+  checkVocabBonus(finding, 'room3');
   const isChain = isCorrect || finding.toLowerCase().includes('chain') || finding.toLowerCase().includes('braestrup');
   if(isChain) {
     gainPts(35, 'Echo chain identified (+35)', 'analysis');
@@ -5229,7 +5438,7 @@ function buildRoom4Content() {
 
         <!-- Task A: Name the ranking decision -->
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--go);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.3rem;">Task A &mdash; Name the curatorial decision</div>
+          <div class="task-section-label">Task A &mdash; Name the curatorial decision</div>
           <div style="font-family:'Crimson Pro',serif;font-size:0.82rem;color:var(--pd);margin-bottom:0.35rem;">Which ONE of the following best describes what the search ranking is doing?</div>
           <div style="display:flex;flex-direction:column;gap:0.25rem;" id="r4-mc-rank">
             <label style="display:flex;align-items:flex-start;gap:0.5rem;font-family:'Crimson Pro',serif;font-size:0.8rem;color:var(--pd);cursor:pointer;"><input type="radio" name="r4rank" value="neutral"> Ranking results by relevance, which is a neutral technical process</label>
@@ -5242,7 +5451,7 @@ function buildRoom4Content() {
 
         <!-- Task B: Buried source scale -->
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--go);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.3rem;">Task B &mdash; What does the ranking bury?</div>
+          <div class="task-section-label">Task B &mdash; What does the ranking bury?</div>
           <div style="font-family:'Crimson Pro',serif;font-size:0.82rem;color:var(--pd);margin-bottom:0.35rem;">Rank these three buried items (results #5, #12, #47) by how much their absence from the top results <em>changes</em> the historical picture. 1 = least change, 3 = most change.</div>
           <div style="display:flex;flex-direction:column;gap:0.25rem;margin-bottom:0.35rem;">
             <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
@@ -5269,7 +5478,7 @@ function buildRoom4Content() {
 
         <!-- Task C: Platform audit statement -->
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--go);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.3rem;">Task C &mdash; Written platform audit</div>
+          <div class="task-section-label">Task C &mdash; Written platform audit</div>
           <textarea class="arch-textarea" id="r4-platform-audit" style="min-height:52px;" placeholder="Name one interface decision that shaped what you saw first. Name one thing the ranking buried that changes the historical picture. Note whether scrolling fatigue changed what you were willing to question."></textarea>
         </div>
 
@@ -5313,6 +5522,7 @@ async function submitRoom4() {
     document.getElementById('r4-bury-3')?.value
   ].join('/');
 
+  checkVocabBonus(audit + ' ' + (buryReason||''), 'room4');
   const notesRanking = audit.toLowerCase().includes('rank') || audit.toLowerCase().includes('bury') ||
     audit.toLowerCase().includes('algorithm') || audit.toLowerCase().includes('vietnamese');
   if(notesRanking) gainPts(15, 'Buried sources identified in audit (+15)', 'analysis');
@@ -5511,6 +5721,7 @@ async function submitRoom5() {
     return;
   }
   if(!audit || audit.length < 25) { showToast('Synthesis required','Write your synthesis audit before the Final Protocol -- name what the AI summary submerged.'); return; }
+  checkVocabBonus(audit, 'room5');
   const notesSmoothing = audit.toLowerCase().includes('smooth') || audit.toLowerCase().includes('disappear') ||
     audit.toLowerCase().includes('hidden') || audit.toLowerCase().includes('absent') ||
     audit.toLowerCase().includes('omit') || audit.toLowerCase().includes('conceal');
