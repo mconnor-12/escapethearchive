@@ -223,7 +223,8 @@ white-space:nowrap;
 .save-btn:hover{border-color:#5a4a30;}.save-btn.saved{color:#2a6030;border-color:#2a6030;}
 
 /* –– photo –– */
-.photo-frame{background:#2a2018;border:7px solid #3a3020;padding:3px;margin-bottom:0.55rem;display:inline-block;max-width:560px;width:100%;}
+.photo-frame{background:#2a2018;border:4px solid #3a3020;padding:2px;margin-bottom:0.55rem;display:block;max-width:560px;width:100%;box-sizing:border-box;}
+.photo-frame img{display:block;width:100%;height:auto;}
 .photo-ph{width:100%;height:190px;background:linear-gradient(145deg,#1a1814,#2a2418 40%,#1e1c18);display:flex;align-items:center;justify-content:center;}
 .photo-scene{text-align:center;color:rgba(200,190,160,0.42);font-family:‘Crimson Pro’,serif;font-size:0.7rem;font-style:italic;padding:1rem;line-height:1.5;}
 .photo-icon{font-size:2.6rem;opacity:0.2;display:block;margin-bottom:0.4rem;}
@@ -471,9 +472,14 @@ color:var(–gi);text-transform:uppercase;margin-bottom:0.4rem;
 }
 .draggable-chip{
 display:inline-block;background:rgba(201,152,42,0.14);border:1px solid rgba(201,152,42,0.3);
-color:var(–go);font-family:‘Crimson Pro’,serif;font-size:0.8rem;
-padding:0.3rem 0.6rem;cursor:grab;margin-bottom:0.35rem;
-transition:opacity 0.2s;user-select:none;
+color:var(–go);font-family:‘Crimson Pro’,serif;font-size:0.9rem;
+padding:0.4rem 0.75rem;cursor:grab;margin-bottom:0.4rem;margin-right:0.3rem;
+transition:opacity 0.15s,background 0.15s,border-color 0.15s;user-select:none;
+touch-action:none;
+}
+.draggable-chip.selected{
+background:rgba(201,152,42,0.35);border-color:var(–go);
+box-shadow:0 0 0 2px rgba(201,152,42,0.5);cursor:pointer;
 }
 .euph-drop-zone{
 background:rgba(14,22,18,0.55);border:1px dashed rgba(201,152,42,0.2);
@@ -3189,29 +3195,105 @@ const chips = document.querySelectorAll(’.draggable-chip’);
 const zones = document.querySelectorAll(’.euph-drop-zone’);
 if(!chips.length || !zones.length) return;
 
+let _selectedChip = null;
+
+// ── Tap-to-select, tap-to-place (best for mobile) ─────────────
+chips.forEach(chip => {
+chip.addEventListener(‘click’, () => {
+if(parseFloat(chip.style.opacity||1) < 0.5) return; // already placed
+chips.forEach(c => c.classList.remove(‘selected’));
+if(_selectedChip === chip) { _selectedChip = null; return; }
+_selectedChip = chip;
+chip.classList.add(‘selected’);
+});
+});
+zones.forEach(zone => {
+zone.addEventListener(‘click’, () => {
+if(!_selectedChip) return;
+_applyEuphDrop(zone, _selectedChip.dataset.term);
+_selectedChip.classList.remove(‘selected’);
+_selectedChip = null;
+});
+});
+
+// ── Mouse drag (desktop) ───────────────────────────────────────
 chips.forEach(chip => {
 chip.addEventListener(‘dragstart’, e => {
 e.dataTransfer.setData(‘text/plain’, chip.dataset.term);
 chip.style.opacity = ‘0.5’;
+chips.forEach(c => c.classList.remove(‘selected’));
+_selectedChip = null;
 });
-chip.addEventListener(‘dragend’, () => chip.style.opacity = ‘1’);
+chip.addEventListener(‘dragend’, () => { if(chip.style.opacity === ‘0.5’) chip.style.opacity = ‘1’; });
 });
-
 zones.forEach(zone => {
 zone.addEventListener(‘dragover’, e => { e.preventDefault(); zone.classList.add(‘drag-over’); });
 zone.addEventListener(‘dragleave’, () => zone.classList.remove(‘drag-over’));
 zone.addEventListener(‘drop’, e => {
 e.preventDefault();
 zone.classList.remove(‘drag-over’);
-const term = e.dataTransfer.getData(‘text/plain’);
+_applyEuphDrop(zone, e.dataTransfer.getData(‘text/plain’));
+});
+});
+
+// ── Touch drag (mobile) ────────────────────────────────────────
+let _dragChip = null, _ghost = null;
+chips.forEach(chip => {
+chip.addEventListener(‘touchstart’, e => {
+_dragChip = chip; chip.style.opacity = ‘0.5’;
+chips.forEach(c => c.classList.remove(‘selected’)); _selectedChip = null;
+_ghost = chip.cloneNode(true);
+_ghost.style.cssText = ‘position:fixed;pointer-events:none;z-index:9999;opacity:0.85;transition:none;font-size:0.85rem;padding:0.3rem 0.6rem;’;
+document.body.appendChild(_ghost);
+const t = e.touches[0];
+_ghost.style.left = (t.clientX - 40) + ‘px’;
+_ghost.style.top  = (t.clientY - 20) + ‘px’;
+}, {passive:true});
+chip.addEventListener(‘touchmove’, e => {
+e.preventDefault();
+if(!_ghost) return;
+const t = e.touches[0];
+_ghost.style.left = (t.clientX - 40) + ‘px’;
+_ghost.style.top  = (t.clientY - 20) + ‘px’;
+zones.forEach(z => z.classList.remove(‘drag-over’));
+const el = document.elementFromPoint(t.clientX, t.clientY);
+const z2 = el && el.closest(’.euph-drop-zone’);
+if(z2) z2.classList.add(‘drag-over’);
+}, {passive:false});
+chip.addEventListener(‘touchend’, e => {
+if(_ghost) { _ghost.remove(); _ghost = null; }
+if(!_dragChip) return;
+zones.forEach(z => z.classList.remove(‘drag-over’));
+const t = e.changedTouches[0];
+const el = document.elementFromPoint(t.clientX, t.clientY);
+const z2 = el && el.closest(’.euph-drop-zone’);
+if(z2) _applyEuphDrop(z2, _dragChip.dataset.term);
+else _dragChip.style.opacity = ‘1’;
+_dragChip = null;
+}, {passive:true});
+});
+
+// Mobile hint
+const grid = document.getElementById(‘euph-grid’);
+if(grid && !grid.querySelector(’.euph-hint’)) {
+const h = document.createElement(‘div’);
+h.className = ‘euph-hint’;
+h.style.cssText = “font-family:‘JetBrains Mono’,monospace;font-size:7px;color:var(–sm);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.55rem;padding:4px 6px;background:rgba(201,152,42,0.06);border-left:2px solid rgba(201,152,42,0.2);”;
+h.textContent = ‘Tap a term to select (it highlights), then tap its definition. Or drag and drop.’;
+grid.insertBefore(h, grid.firstChild);
+}
+}
+
+function _applyEuphDrop(zone, term) {
 const correct = zone.dataset.answer === term;
 zone.classList.remove(‘drop-correct’,‘drop-wrong’);
 zone.classList.add(correct ? ‘drop-correct’ : ‘drop-wrong’);
 const chip = document.getElementById(‘chip-’+term);
-if(correct && chip) { chip.style.opacity = ‘0.3’; chip.draggable = false; }
+if(chip) {
+if(correct) { chip.style.opacity = ‘0.3’; chip.draggable = false; chip.classList.remove(‘selected’); }
+else chip.style.opacity = ‘1’;
+}
 checkAllEuph();
-});
-});
 }
 
 let _euphCorrectDnd = {voluntary:false, assembly:false, evacuees:false};
