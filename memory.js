@@ -638,6 +638,14 @@ function setSyncEl(id,ok){
 // ========================================================
 // GAME START
 // ========================================================
+// Helper: wrap any promise with a timeout, resolving to null on timeout
+function _withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise(resolve => setTimeout(() => resolve(null), ms))
+  ]);
+}
+
 async function startGame(){
   const firstName = (document.getElementById('sfirst')?.value||'').trim();
   const lastName  = (document.getElementById('slast')?.value||'').trim();
@@ -650,73 +658,58 @@ async function startGame(){
   if(!period){    if(errEl){errEl.textContent='Please select your class period.';errEl.style.display='block';} return; }
   if(errEl) errEl.style.display='none';
 
-  try {
-    // Server-side validation (non-blocking if network is unavailable)
-    const vRes = await post({action:'validateStudent', first_name:firstName, last_name:lastName, class_period:period});
-    if(vRes && !vRes.ok && !vRes.network_error){
-      if(errEl){errEl.textContent=vRes.error||'Registration error. Please try again.';errEl.style.display='block';}
-      return;
-    }
+  // Show "starting" briefly on the button
+  const btn = document.querySelector('#screen-config .btn-gold');
+  if(btn){ btn.disabled=true; btn.textContent='Starting...'; }
 
+  try {
+    // ── Set up session state IMMEDIATELY -- zero network dependency ──
     S.studentName = firstName + ' ' + lastName;
     S.firstName   = firstName;
     S.lastName    = lastName;
     S.period      = period;
     if(!S.role) S.role='lead';
-
     S.sessionId = 'SES_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
 
+    // Build game UI -- all local, instant
     applyRoleUI();
     renderLocker();
     buildPrologueTasks();
     buildRoom1();
 
-    // ── Test connection before session start ──────────────────────
-    // Show "connecting" state
-    const errEl2 = document.getElementById('reg-error');
-    if(errEl2) {
-      errEl2.style.display = 'block';
-      errEl2.style.color   = 'var(--gi)';
-      errEl2.style.borderColor = 'rgba(201,152,42,0.2)';
-      errEl2.style.background  = 'rgba(14,31,22,0.4)';
-      errEl2.textContent = 'Connecting to Archive Ledger...';
-    }
-
-    // Attempt connection
-    const pingOk = await _doPost({action:'ping'});
-    if(!pingOk) {
-      console.error('[Sheets] Cannot reach AppScript -- check deployment URL and access settings');
-      if(errEl2) {
-        errEl2.style.color = 'var(--el)';
-        errEl2.style.borderColor = 'rgba(192,72,40,0.3)';
-        errEl2.style.background  = 'rgba(139,58,42,0.06)';
-        errEl2.innerHTML = '<strong>Warning:</strong> Cannot reach Archive Ledger. Your work will not save to Google Sheets. ' +
-          'Check that the AppScript is deployed as a web app with access set to <strong>Anyone</strong>. ' +
-          '<a href="https://docs.google.com/spreadsheets/d/1F2NrS4Gaz7WY2pJCMSbE4F-DGKGc0szalpPUPtMaAks/edit" ' +
-          'target="_blank" style="color:var(--go);">Open the Sheet</a> to verify.';
-      }
-      // Still proceed -- game works offline, just won’t save
-    } else {
-      if(errEl2) errEl2.style.display = 'none';
-    }
-
-    const res = await post({action:'startSession', session_id:S.sessionId,
-      student_name:S.studentName, first_name:firstName, last_name:lastName,
-      role:S.role, class_period:S.period, team_name:''});
-    setSyncEl('sync-pro', res&&res.ok);
-
+    // ── Navigate NOW -- never wait for network ──
+    if(btn){ btn.disabled=false; btn.textContent='Enter the Archive'; }
+    if(errEl) errEl.style.display='none';
     goTo('screen-prologue');
     startTimer();
     setTimeout(() => { updateRoomProgress('prologue'); updateRoomProgress('room1'); }, 250);
 
+    // ── Fire all network calls in the background ──
+    // validateStudent: advisory only, 4s timeout, never blocks navigation
+    _withTimeout(post({action:'validateStudent', first_name:firstName,
+      last_name:lastName, class_period:period}), 4000)
+      .then(vRes => {
+        if(vRes && !vRes.ok && !vRes.network_error)
+          console.warn('[Ledger] validateStudent advisory:', vRes.error);
+      }).catch(()=>{});
+
+    // startSession: fire and forget
+    _withTimeout(post({action:'startSession', session_id:S.sessionId,
+      student_name:S.studentName, first_name:firstName, last_name:lastName,
+      role:S.role, class_period:S.period, team_name:''}), 6000)
+      .then(res => { setSyncEl('sync-pro', res&&res.ok); })
+      .catch(()=>{});
+
   } catch(err) {
     console.error('startGame error:', err);
+    if(btn){ btn.disabled=false; btn.textContent='Enter the Archive'; }
     if(errEl){
-      errEl.textContent = 'Error starting session: ' + err.message + '. Please refresh and try again.';
-      errEl.style.display = 'block';
+      errEl.textContent='Error starting session: '+err.message+'. Please refresh.';
+      errEl.style.display='block'; errEl.style.color='var(--el)';
     }
   }
 }
+
 
 // ── Load registration data from AppScript on page load ──────────
 async function loadRegistration() {
@@ -730,10 +723,13 @@ async function loadRegistration() {
     }
   }
 
+  // Show static periods IMMEDIATELY -- dropdown always works, even offline
+  setStaticPeriods();
+
+  // Try to upgrade with teacher-configured periods in background (3s timeout)
   try {
-    // Use a short timeout -- if AppScript doesn’t respond quickly, use static fallback
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), 3000);
     const r = await fetch(API.url + '?action=getRegistration', {
       cache:'no-store',
       signal: controller.signal
@@ -746,13 +742,9 @@ async function loadRegistration() {
           d.periods.map(p => `<option value="${p.value}">${p.label}</option>`).join('');
       }
       if(d.scoring) window._teacherScoring = d.scoring;
-    } else {
-      setStaticPeriods();
     }
   } catch(e) {
-    // CORS, network, or timeout -- fall back to static periods immediately
-    console.warn('loadRegistration fallback:', e.message);
-    setStaticPeriods();
+    console.warn('loadRegistration: using static periods,', e.message);
   }
 }
 
@@ -4994,7 +4986,7 @@ async function syncDashboard() {
   let pingSuccess = false;
   try {
     const controller = new AbortController();
-    setTimeout(() => controller.abort(), 8000);
+    setTimeout(() => controller.abort(), 3000); // 3s max -- landing page must feel instant
     const r = await fetch(API.url+'?action=ping',{cache:'no-store', signal:controller.signal});
     const d = await r.json();
     if(d.ok) {
@@ -5005,11 +4997,13 @@ async function syncDashboard() {
         ? 'Archive Ledger connected -- '+d.app
         : 'Connected (v3 script -- deploy v4 script for full features)';
     } else {
-      dot.className='sdot err'; msg.textContent='Ledger error -- proceeding offline';
+      dot.className='sdot err'; msg.textContent='Ledger unavailable -- you can still play. Notes save locally.';
     }
   } catch(e) {
     dot.className='sdot err';
-    msg.textContent='Offline -- data will not save. Check script deployment.';
+    msg.textContent='Archive Ledger offline. You can still play -- work saves locally.';
+    const offlineNotice = document.getElementById('offline-notice');
+    if(offlineNotice) offlineNotice.style.display='block';
     console.warn('Ping failed:', e.message);
   }
   // Load period dropdown (works even if ping fails -- tries independently)

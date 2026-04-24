@@ -54,8 +54,11 @@
       <p>Before it goes live, the archive must be verified. You will choose an audit role. That role determines which records you see first, which decisions you face, and what you will be asked to produce. The same history. Different conditions of judgment.</p>
       <p>The escape is not from history. It is from the illusion that what you are given is complete.</p>
     </div>
-    <div style="display:flex;align-items:center;gap:7px;justify-content:center;margin-bottom:1.1rem;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--sm);letter-spacing:0.1em;">
-      <div class="sdot" id="conn-dot"></div><span id="conn-msg">Connecting to Archive Ledger...</span>
+    <div style="display:flex;align-items:center;gap:7px;justify-content:center;margin-bottom:0.5rem;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--sm);letter-spacing:0.1em;">
+      <div class="sdot" id="conn-dot"></div><span id="conn-msg">Checking Archive Ledger...</span>
+    </div>
+    <div id="offline-notice" style="display:none;font-family:'Crimson Pro',serif;font-size:0.78rem;color:rgba(210,160,60,0.85);background:rgba(14,31,22,0.5);border:0.5px solid rgba(201,152,42,0.2);padding:0.4rem 0.8rem;margin-bottom:0.7rem;max-width:400px;text-align:center;">
+      Ledger offline — your work will save locally. You can still play.
     </div>
     <button class="btn-enter" onclick="goTo('screen-roles')">Enter the Archive</button>
   </div>
