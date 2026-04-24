@@ -749,3 +749,405 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   flex-shrink:0;color:rgba(201,152,42,0.4);
 }
 
+
+/* ================================================================
+   SECOND-PASS IMPROVEMENTS
+   ================================================================ */
+
+/* ── Focus / keyboard navigation ─────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgba(201,152,42,0.75);
+  outline-offset: 2px;
+}
+.hotspot:focus-visible {
+  outline: 2px solid var(--go);
+  outline-offset: 3px;
+}
+.prov-btn:focus-visible,
+.sig-rate-btn:focus-visible,
+.btn-task:focus-visible,
+.btn-gold:focus-visible,
+.btn-ghost:focus-visible {
+  outline: 2px solid rgba(201,152,42,0.8);
+  outline-offset: 2px;
+}
+
+/* ── Consistent button sizes ─────────────────────────────────── */
+.btn-gold, .btn-ghost {
+  min-height: 42px;
+}
+.btn-task {
+  min-height: 40px;
+  font-size: 0.88rem;
+}
+
+/* ── Timer: pause button inline ──────────────────────────────── */
+.timer-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.timer-pause-btn {
+  background: transparent;
+  border: 0.5px solid rgba(201,152,42,0.25);
+  color: rgba(201,152,42,0.5);
+  font-size: 0.6rem;
+  padding: 1px 4px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+  transition: all 0.15s;
+}
+.timer-pause-btn:hover {
+  border-color: var(--go);
+  color: var(--go);
+}
+
+/* ── Per-room progress bar ───────────────────────────────────── */
+.room-progress-bar-wrap {
+  max-width: 620px;
+  margin-bottom: 0.7rem;
+}
+.room-progress-bar-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  color: var(--gi);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+.room-progress-bar-track {
+  height: 3px;
+  background: rgba(201,152,42,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.room-progress-bar-fill {
+  height: 100%;
+  background: var(--go);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+  width: 0%;
+}
+
+/* ── Panel auto-tally badges ─────────────────────────────────── */
+.panel-tally {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
+  background: rgba(201,152,42,0.18);
+  color: var(--go);
+  border: 0.5px solid rgba(201,152,42,0.3);
+  padding: 1px 5px;
+  margin-left: 5px;
+  vertical-align: middle;
+  transition: background 0.3s;
+}
+.panel-tally.has-items {
+  background: rgba(74,138,114,0.18);
+  color: var(--vd);
+  border-color: rgba(74,138,114,0.3);
+}
+
+/* ── Submission confirmation banner ──────────────────────────── */
+.submit-confirm-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(74,138,114,0.1);
+  border: 1px solid rgba(74,138,114,0.35);
+  border-left: 3px solid var(--vd);
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.8rem;
+  color: var(--vd);
+  animation: bannerSlide 0.3s ease;
+}
+@keyframes bannerSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.submit-confirm-banner .scb-what {
+  font-size: 0.72rem;
+  color: var(--pd);
+  margin-top: 2px;
+  font-style: italic;
+}
+
+/* ── Star / bookmark sources ─────────────────────────────────── */
+.star-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: rgba(201,152,42,0.3);
+  transition: color 0.15s, transform 0.15s;
+  padding: 0 3px;
+  flex-shrink: 0;
+}
+.star-btn:hover { color: rgba(201,152,42,0.7); transform: scale(1.15); }
+.star-btn.starred { color: var(--go); }
+.filter-bar {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 0.5px solid rgba(201,152,42,0.25);
+  color: var(--sm);
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover, .filter-btn.active {
+  background: rgba(201,152,42,0.1);
+  border-color: rgba(201,152,42,0.5);
+  color: var(--go);
+}
+
+/* ── Running protocol checklist (side panel) ─────────────────── */
+.protocol-mini {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.06em;
+}
+.proto-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 3px 0;
+  border-bottom: 0.5px solid rgba(201,152,42,0.07);
+  color: var(--sm);
+  line-height: 1.4;
+}
+.proto-item.done { color: var(--vd); }
+.proto-check {
+  width: 12px;
+  flex-shrink: 0;
+  color: rgba(201,152,42,0.3);
+}
+.proto-item.done .proto-check { color: var(--vd); }
+.proto-draft-link {
+  font-style: italic;
+  color: rgba(201,152,42,0.45);
+  font-size: 6.5px;
+  cursor: pointer;
+}
+.proto-draft-link:hover { color: var(--go); }
+
+/* ── Dupe warning chip ───────────────────────────────────────── */
+.dupe-warn {
+  background: rgba(160,104,48,0.12);
+  border: 0.5px solid rgba(160,104,48,0.35);
+  color: var(--smon-c);
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.5rem;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* ── Three-tier provenance pills ─────────────────────────────── */
+.prov-tier-wrap {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.prov-tier-btn {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  border: 1px solid;
+  cursor: pointer;
+  background: rgba(14,22,18,0.7);
+  transition: all 0.15s;
+}
+.prov-tier-btn.authentic  { border-color: rgba(74,138,114,0.45);  color: rgba(90,175,130,0.9); }
+.prov-tier-btn.derivative { border-color: rgba(201,152,42,0.4);   color: rgba(201,152,42,0.85); }
+.prov-tier-btn.questionable{ border-color: rgba(192,72,40,0.45); color: rgba(210,100,70,0.9); }
+.prov-tier-btn:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-1px); }
+.prov-tier-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
+.prov-tier-btn.selected  { font-weight: bold; box-shadow: 0 0 6px rgba(201,152,42,0.2); }
+
+/* ── Signal matrix (side panel) ─────────────────────────────── */
+.sig-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6.5px;
+  letter-spacing: 0.05em;
+}
+.sig-matrix th {
+  color: var(--go);
+  border-bottom: 0.5px solid rgba(201,152,42,0.2);
+  padding: 2px 3px;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 6px;
+}
+.sig-matrix td {
+  padding: 2px 3px;
+  border-bottom: 0.5px solid rgba(201,152,42,0.05);
+  color: var(--sm);
+  vertical-align: top;
+  line-height: 1.4;
+}
+.sig-matrix .present { color: var(--vd); }
+.sig-matrix .absent  { color: rgba(139,58,42,0.7); }
+
+/* ── Analyst: add-category input ─────────────────────────────── */
+.add-cat-row {
+  display: flex;
+  gap: 5px;
+  margin-top: 0.4rem;
+  align-items: center;
+}
+.add-cat-input {
+  flex: 1;
+  background: rgba(10,20,15,0.8);
+  border: 0.5px dashed rgba(122,106,170,0.35);
+  color: var(--pa);
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  outline: none;
+}
+.add-cat-input:focus { border-color: rgba(122,106,170,0.65); }
+.add-cat-btn {
+  background: transparent;
+  border: 0.5px solid rgba(122,106,170,0.35);
+  color: rgba(122,106,170,0.75);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
+  padding: 4px 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.add-cat-btn:hover { border-color: rgba(122,106,170,0.65); color: var(--pa); }
+
+/* ── Cross-room synthesis question ───────────────────────────── */
+.synthesis-block {
+  max-width: 620px;
+  background: rgba(122,106,170,0.07);
+  border: 0.5px solid rgba(122,106,170,0.2);
+  border-left: 2px solid rgba(122,106,170,0.5);
+  padding: 0.75rem 0.9rem;
+  margin-top: 0.9rem;
+}
+.synthesis-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.15em;
+  color: rgba(122,106,170,0.85);
+  text-transform: uppercase;
+  margin-bottom: 0.45rem;
+}
+.synthesis-q {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.83rem;
+  color: var(--pd);
+  font-style: italic;
+  margin-bottom: 0.5rem;
+  line-height: 1.55;
+}
+
+/* ── Onboarding overlay ──────────────────────────────────────── */
+.onboard-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,12,8,0.93);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.onboard-panel {
+  max-width: 560px;
+  width: 100%;
+  background: rgba(12,22,16,0.98);
+  border: 1px solid rgba(201,152,42,0.3);
+  padding: 2rem 2.2rem;
+  animation: fadeUp 0.5s ease both;
+}
+.onboard-title {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 1.3rem;
+  color: var(--iv);
+  margin-bottom: 0.5rem;
+}
+.onboard-step {
+  display: none;
+}
+.onboard-step.active {
+  display: block;
+}
+.onboard-step-body {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.88rem;
+  color: var(--pd);
+  line-height: 1.65;
+  margin-bottom: 1.1rem;
+}
+.onboard-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.onboard-pip-row {
+  display: flex;
+  gap: 5px;
+}
+.onboard-pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(201,152,42,0.2);
+  transition: background 0.2s;
+}
+.onboard-pip.active {
+  background: var(--go);
+}
+.onboard-feature {
+  display: flex;
+  gap: 0.75rem;
+  background: rgba(14,31,22,0.5);
+  border: 0.5px solid rgba(201,152,42,0.14);
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.5rem;
+  align-items: flex-start;
+}
+.onboard-feature-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.onboard-feature-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.82rem;
+  color: var(--pd);
+  line-height: 1.5;
+}
+.onboard-feature-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
+  color: var(--go);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}

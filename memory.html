@@ -197,13 +197,13 @@
         <div class="sbar" style="height:7px"></div><div class="sbar" style="height:10px"></div>
         <div class="sbar" style="height:13px"></div><div class="sbar" style="height:16px"></div><div class="sbar" style="height:19px"></div>
       </div></div>
-    <div class="hdr-timer" id="tmr-pro">57:00</div>
+    <div class="timer-wrap"><div class="hdr-timer" id="tmr-pro">57:00</div><button class="timer-pause-btn" onclick="toggleTimer()" id="timer-pause-pro" title="Pause/resume timer" aria-label="Pause timer">⏸</button></div>
   </div>
   <div class="game-body">
     <div class="tool-rail">
-      <div class="ts"><div class="ts-label">Evidence Locker</div>
+      <div class="ts"><div class="ts-label">Evidence Locker <span class="panel-tally" id="tally-locker">0</span></div>
         <div class="locker-box" id="lkr-pro"><div class="locker-empty">No artifacts saved.</div></div></div>
-      <div class="ts"><div class="ts-label">Missing Voices</div>
+      <div class="ts"><div class="ts-label">Missing Voices <span class="panel-tally" id="tally-voices">0</span></div>
         <div class="voices-box" id="vc-pro"><span style="font-size:0.72rem;">None flagged yet.</span></div></div>
       <div class="ts"><div class="ts-label" style="color:var(--er);">What Cannot Be Reconstructed</div>
         <div id="rem-pro"><div class="locker-empty">Nothing marked yet.</div></div>
@@ -211,6 +211,10 @@
       </div>
       <div class="ts"><div class="ts-label">Principle Cards</div>
         <div class="prin-stack" id="pc-pro"><div class="prin-empty">Earned after each room.</div></div></div>
+      <div class="ts" id="proto-mini-wrap" style="display:none;">
+        <div class="ts-label">Escape Protocol <span class="panel-tally" id="tally-proto">0/7</span></div>
+        <div class="protocol-mini" id="proto-mini-list"></div>
+      </div>
       <div class="ts"><button class="hint-btn" onclick="useHint('pro')"><span>Request a hint</span><span class="hc" id="hc-pro">3 remaining</span></button></div>
       <div class="ts">
         <div class="path-indicator">
@@ -359,17 +363,17 @@
               <div class="task-card-body">
                 <p class="task-instruction">Look at the document header carefully. Three specific details are worth examining before you trust the content. <strong>Click each to reveal what is notable about it.</strong></p>
                 <div class="hotspot-grid" id="lead-hotspots">
-                  <div class="hotspot" id="hs-date" onclick="revealHotspot('date')">
+                  <div class="hotspot" id="hs-date" tabindex="0" role="button" aria-label="Examine document date" onclick="revealHotspot('date')">
                     <div class="hs-label">Document Date: September 14, 1944</div>
                     <div class="hs-prompt">Click to examine</div>
                     <div class="hs-reveal" id="hsr-date">The document is dated 1944 but claims to document events from 1942 to 1945 &mdash; including events that had not yet happened when it was written. A record cannot be contemporary with events it has not yet witnessed.</div>
                   </div>
-                  <div class="hotspot" id="hs-caption" onclick="revealHotspot('caption')">
+                  <div class="hotspot" id="hs-caption" tabindex="0" role="button" aria-label="Examine caption language" onclick="revealHotspot('caption')">
                     <div class="hs-label">&ldquo;voluntarily relocate&rdquo;</div>
                     <div class="hs-prompt">Click to examine</div>
                     <div class="hs-reveal" id="hsr-caption">Executive Order 9066 authorized forced removal under military authority. The word &ldquo;voluntary&rdquo; does ideological work while appearing merely descriptive. The caption is an argument, not a description.</div>
                   </div>
-                  <div class="hotspot" id="hs-scope" onclick="revealHotspot('scope')">
+                  <div class="hotspot" id="hs-scope" tabindex="0" role="button" aria-label="Examine scope claim" onclick="revealHotspot('scope')">
                     <div class="hs-label">&ldquo;comprehensive account of life on the American home front&rdquo;</div>
                     <div class="hs-prompt">Click to examine</div>
                     <div class="hs-reveal" id="hsr-scope">The exhibit lists three source types: government correspondence, photographs, and public information campaigns. All three are government-produced. &ldquo;Comprehensive&rdquo; is a claim the source list does not support.</div>
@@ -509,6 +513,10 @@
                       <option value="structural">Structurally excluded -- archive not built for this</option>
                     </select>
                   </div>
+                </div>
+                <div class="add-cat-row">
+                  <input class="add-cat-input" id="custom-cat-input" type="text" placeholder="Add a source category not listed above..." aria-label="Add custom absence category">
+                  <button class="add-cat-btn" onclick="addCustomCategory()">+ Add</button>
                 </div>
                 <button class="btn-task" style="margin-top:0.65rem;" onclick="submitAnalystCats()">Submit category map</button>
                 <div id="analyst-result" style="display:none;margin-top:0.55rem;" class="task-feedback">Category map recorded. You have named what is absent before you read what is present. That is source-system analysis.</div>
@@ -1009,5 +1017,41 @@
 
 
 <script src="memory.js"></script>
+
+<!-- ===== ONBOARDING OVERLAY ===== -->
+<div id="onboard-overlay" class="onboard-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="onboard-title">
+  <div class="onboard-panel">
+    <div class="onboard-title" id="onboard-title">Before You Begin the Audit</div>
+    <div id="onboard-step-1" class="onboard-step active">
+      <div class="onboard-step-body">You are an archivist. You have 57 minutes to audit a historical exhibit before it publishes. Each role in your team sees the same sources differently — and asks different questions of them.</div>
+      <div class="onboard-feature"><div class="onboard-feature-icon">⏱</div><div class="onboard-feature-text"><div class="onboard-feature-label">Timer</div>Shows time remaining. You can pause it — click the ⏸ icon next to the clock. Some rooms take longer than others.</div></div>
+      <div class="onboard-feature"><div class="onboard-feature-icon">📊</div><div class="onboard-feature-text"><div class="onboard-feature-label">Signal Meter</div>The bars in the top bar track your analytical depth. They go up as you examine sources carefully — not just quickly.</div></div>
+    </div>
+    <div id="onboard-step-2" class="onboard-step">
+      <div class="onboard-step-body">Three panels in the left rail track your work as you go. They update automatically.</div>
+      <div class="onboard-feature"><div class="onboard-feature-icon">🗄</div><div class="onboard-feature-text"><div class="onboard-feature-label">Evidence Locker</div>Save artifacts you want to use in your final claim. You have limited space — curate, don't collect.</div></div>
+      <div class="onboard-feature"><div class="onboard-feature-icon">👁</div><div class="onboard-feature-text"><div class="onboard-feature-label">Missing Voices</div>Flags source types that are absent from the archive. The analyst in your team names them — but every role should notice them.</div></div>
+      <div class="onboard-feature"><div class="onboard-feature-icon">🔒</div><div class="onboard-feature-text"><div class="onboard-feature-label">What Cannot Be Reconstructed</div>Some things in the archive are permanently lost or unavailable. Mark them. A claim that ignores its own limits is not a responsible claim.</div></div>
+    </div>
+    <div id="onboard-step-3" class="onboard-step">
+      <div class="onboard-step-body">At the end of all five rooms, you will write a seven-part Escape Protocol — your complete historical argument. You can draft parts of it as you go using the Protocol Checklist in the side panel.</div>
+      <div class="onboard-feature"><div class="onboard-feature-icon">⭐</div><div class="onboard-feature-text"><div class="onboard-feature-label">Star Sources</div>In Rooms 2–4 (Lead Auditor), you can star sources that seem pivotal. Use the filter bar to show only starred items.</div></div>
+      <div class="onboard-feature"><div class="onboard-feature-icon">↩</div><div class="onboard-feature-text"><div class="onboard-feature-label">Undo Saves</div>You can remove artifacts from the locker and add notes to each one. Choose carefully — not everything that seems important is defensible.</div></div>
+    </div>
+    <div class="onboard-nav">
+      <button class="btn-ghost" style="font-size:0.72rem;padding:0.5rem 1rem;" onclick="onboardPrev()" id="onboard-prev-btn" disabled>← Back</button>
+      <div class="onboard-pip-row" id="onboard-pips">
+        <div class="onboard-pip active" id="opip-1"></div>
+        <div class="onboard-pip" id="opip-2"></div>
+        <div class="onboard-pip" id="opip-3"></div>
+      </div>
+      <button class="btn-gold" style="font-size:0.78rem;padding:0.55rem 1.3rem;" onclick="onboardNext()" id="onboard-next-btn">Next →</button>
+    </div>
+    <div style="text-align:center;margin-top:0.75rem;">
+      <button onclick="dismissOnboarding()" style="background:transparent;border:none;font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--sm);letter-spacing:0.1em;cursor:pointer;text-decoration:underline;text-transform:uppercase;">Skip — I know how this works</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

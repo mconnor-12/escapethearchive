@@ -819,8 +819,10 @@ document.addEventListener('change', function(e) {
   if(name === 'r4rank' || id.startsWith('r4-bury')) updateRoomProgress('room4');
 });
 
+let _timerPaused = false;
 function startTimer(){
   timerInt=setInterval(()=>{
+    if(_timerPaused) return;
     S.timer=Math.max(0,S.timer-1);
     const m=Math.floor(S.timer/60), s=S.timer%60;
     const str=m+':'+(s<10?'0':'')+s;
@@ -829,6 +831,15 @@ function startTimer(){
       el.classList.toggle('low',S.timer<300);
     });
   },1000);
+}
+function toggleTimer(){
+  _timerPaused=!_timerPaused;
+  document.querySelectorAll('[id^="timer-pause-"]').forEach(btn=>{
+    btn.textContent=_timerPaused?'▶':'⏸';
+    btn.title=_timerPaused?'Resume timer':'Pause timer';
+    btn.style.color=_timerPaused?'var(--go)':'';
+  });
+  if(_timerPaused) showToast('Timer Paused','Click ▶ to resume.',2000);
 }
 
 // ========================================================
@@ -892,6 +903,13 @@ function saveVoiceNote(cat, val){
   if(!S.voiceNotes) S.voiceNotes = {};
   S.voiceNotes[cat] = val;
 }
+function updateVoiceTally(){
+  const count = S.voices.length;
+  document.querySelectorAll('[id^="tally-voices"]').forEach(el=>{
+    el.textContent=count;
+    el.classList.toggle('has-items',count>0);
+  });
+}
 
 function renderLocker(){
   const MAX_LOCKER = 8;
@@ -940,6 +958,11 @@ function renderLocker(){
       box.appendChild(wrap);
     });
   });
+  // Update tally badge
+  const tb = document.getElementById('tally-locker');
+  if(tb){ tb.textContent=S.locker.length; tb.classList.toggle('has-items',S.locker.length>0); }
+  // Update protocol checklist if shown
+  updateProtocolChecklist();
 }
 
 // ========================================================
@@ -1045,6 +1068,7 @@ async function submitAnnotations() {
 
   _advanceStep(1, 2);
 
+  showSubmitConfirm(document.getElementById('pro-annotations'), 'Annotations saved', 'Your notes on claim, sources, and flags have been recorded.');
   checkVocabBonus(claim + ' ' + sources, 'prologue');
   checkHistoryBonus(claim + ' ' + sources + ' ' + (flag||''), 'prologue');
   await post({action:'saveResponse', session_id:S.sessionId, student_name:S.studentName,
@@ -1124,7 +1148,9 @@ async function provVerdict(btn, field, verdict) {
   const allAnswered = Object.keys(_provVerdicts).length >= 3;
   if(allAnswered && !S.pro.roleTaskDone) {
     S.pro.roleTaskDone = true;
-    document.getElementById('prov-result').style.display = 'block';
+    const provResultEl = document.getElementById('prov-result');
+    provResultEl.style.display = 'block';
+    showSubmitConfirm(provResultEl, 'Provenance check complete', 'All three fields assessed. Inconsistencies flagged.');
     document.getElementById('btn-mis').style.display = 'inline-block';
     markTask('pt2');
     setSignal(S.signal + 1);
@@ -1169,6 +1195,7 @@ async function submitAnalystCats() {
   S.pro.roleTaskDone = true;
   const resultEl = document.getElementById('analyst-result');
   resultEl.style.display = 'block';
+  showSubmitConfirm(resultEl, 'Category map submitted', `${score}/5 categories correctly classified.`);
   resultEl.innerHTML =
     score >= 4
       ? `<strong>${score}/5 correct.</strong> You have named what is structurally absent before reading what is present. First-person testimony and community legal records are not named as source types -- that absence is a curatorial decision, not an oversight.`
@@ -1193,6 +1220,7 @@ async function submitAnalystCats() {
   if(vals.legal === 'structural' || vals.legal === 'absent') {
     S.voices.push('Legal challenges and community petitions');
   }
+  updateVoiceTally();
   // Render voices panel with categories + why-note fields
   const vc = document.getElementById('vc-pro');
   if(vc) {
@@ -1257,8 +1285,9 @@ async function rateSig(btn, signal, rating) {
     S.pro.roleTaskDone = true;
     const correctCount = Object.entries(_sigRatings)
       .filter(([sig, rat]) => (_sigUnearned.includes(sig) && rat === 'unearned') || (!_sigUnearned.includes(sig) && rat === 'earned')).length;
-    document.getElementById('signal-result').style.display = 'block';
-    document.getElementById('signal-result').innerHTML =
+    const sigResultEl = document.getElementById('signal-result');
+    sigResultEl.style.display = 'block';
+    sigResultEl.innerHTML =
       `<strong>${correctCount}/5 signals correctly rated.</strong> ` +
       (correctCount >= 4
         ? 'The most powerful signals are the ones that claim completeness and accuracy -- because those are the ones the evidence cannot support.'
@@ -1267,6 +1296,7 @@ async function rateSig(btn, signal, rating) {
     markTask('pt2');
     setSignal(S.signal + 1);
     gainPts(correctCount >= 4 ? 25 : 15, 'Signal audit complete (+' + (correctCount >= 4 ? 25 : 15) + ')', 'analysis');
+    showSubmitConfirm(sigResultEl, 'Signal audit submitted', correctCount + '/5 signals correctly rated.');
     await post({action:'saveResponse', session_id:S.sessionId, student_name:S.studentName,
       room:'prologue', task_id:'PROL_SIG_01', task_label:'Trust signal ratings',
       response_type:'multi_rating', response_value:JSON.stringify(_sigRatings),
@@ -5600,3 +5630,443 @@ if(typeof evidSaveDoc !== 'undefined') {
 
 console.log('Escape the Archive v4 loaded. 48 objects, custom archival standards, full Sheets sync.');
 
+
+// ================================================================
+// SECOND-PASS IMPROVEMENTS
+// ================================================================
+
+// ── Onboarding overlay ────────────────────────────────────────────
+let _onboardStep = 1;
+const ONBOARD_TOTAL = 3;
+
+function showOnboarding() {
+  const seen = localStorage.getItem('escape_archive_onboard_seen');
+  if(seen) return; // already dismissed
+  const overlay = document.getElementById('onboard-overlay');
+  if(overlay) overlay.style.display = 'flex';
+}
+
+function onboardNext() {
+  if(_onboardStep >= ONBOARD_TOTAL) { dismissOnboarding(); return; }
+  _setOnboardStep(_onboardStep + 1);
+}
+
+function onboardPrev() {
+  if(_onboardStep <= 1) return;
+  _setOnboardStep(_onboardStep - 1);
+}
+
+function _setOnboardStep(n) {
+  document.getElementById('onboard-step-' + _onboardStep)?.classList.remove('active');
+  document.getElementById('opip-' + _onboardStep)?.classList.remove('active');
+  _onboardStep = n;
+  document.getElementById('onboard-step-' + n)?.classList.add('active');
+  document.getElementById('opip-' + n)?.classList.add('active');
+  const prevBtn = document.getElementById('onboard-prev-btn');
+  const nextBtn = document.getElementById('onboard-next-btn');
+  if(prevBtn) prevBtn.disabled = n <= 1;
+  if(nextBtn) nextBtn.textContent = n >= ONBOARD_TOTAL ? 'Begin Audit →' : 'Next →';
+}
+
+function dismissOnboarding() {
+  const overlay = document.getElementById('onboard-overlay');
+  if(overlay) overlay.style.display = 'none';
+  try { localStorage.setItem('escape_archive_onboard_seen', '1'); } catch(e){}
+}
+
+// Show onboarding when navigating to prologue for first time
+const _origGoToForOnboard = goTo;
+(function(){
+  const _orig = goTo;
+  let _prologueSeen = false;
+  goTo = function(id) {
+    _orig(id);
+    if(id === 'screen-prologue' && !_prologueSeen) {
+      _prologueSeen = true;
+      setTimeout(showOnboarding, 400);
+    }
+  };
+})();
+
+// Keyboard: Enter/Space to activate hotspots
+document.addEventListener('keydown', function(e) {
+  if((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('hotspot')) {
+    e.preventDefault();
+    e.target.click();
+  }
+});
+
+// ── Submission confirmation banners ───────────────────────────────
+function showSubmitConfirm(afterEl, label, detail) {
+  if(!afterEl) return;
+  // Remove any existing banner first
+  const existing = afterEl.parentNode?.querySelector('.submit-confirm-banner');
+  if(existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.className = 'submit-confirm-banner';
+  banner.setAttribute('role', 'status');
+  banner.setAttribute('aria-live', 'polite');
+  banner.innerHTML = `<span>✓ ${label}</span><div class="scb-what">${detail}</div>`;
+  afterEl.insertAdjacentElement('afterend', banner);
+  // Fade out after 6s but stay in DOM
+  setTimeout(() => { banner.style.transition='opacity 1s'; banner.style.opacity='0.4'; }, 6000);
+}
+
+// ── Protocol running checklist ────────────────────────────────────
+const PROTO_ITEMS = [
+  { id:'proto_historical',  label:'1. Historical Claim',  hint:'What can you say, with what evidence?' },
+  { id:'proto_curation',    label:'2. Curation Claim',    hint:'What did you select, and what does that argue?' },
+  { id:'proto_limitation',  label:'3. Limitation Claim',  hint:'What cannot be responsibly said?' },
+  { id:'proto_saturation',  label:'4. Saturation Note',   hint:'What did abundance obscure?' },
+  { id:'proto_handoff',     label:'5. Handoff Decision',  hint:'Publish, return, hold, or contest?' },
+  { id:'proto_remnant',     label:'6. Remnant',           hint:'What should stay open?' },
+  { id:'proto_reflection',  label:'7. Role Reflection',   hint:'How did your responsibility change?' },
+];
+const _protoDrafts = {};
+let _protoDone = new Set();
+
+function updateProtocolChecklist() {
+  const wrap = document.getElementById('proto-mini-wrap');
+  const list = document.getElementById('proto-mini-list');
+  const tally = document.getElementById('tally-proto');
+  if(!list) return;
+  if(wrap) wrap.style.display = 'block';
+  list.innerHTML = PROTO_ITEMS.map(item => {
+    const done = _protoDone.has(item.id);
+    const hasDraft = !!(_protoDrafts[item.id]?.length > 5);
+    return `<div class="proto-item${done?' done':''}">
+      <span class="proto-check">${done?'✓':'○'}</span>
+      <span>${item.label}${hasDraft && !done ? ' <em style="font-size:6px;color:var(--go);">[draft]</em>' : ''}</span>
+    </div>`;
+  }).join('');
+  if(tally) tally.textContent = `${_protoDone.size}/7`;
+}
+
+function markProtoDone(itemId) {
+  _protoDone.add(itemId);
+  updateProtocolChecklist();
+}
+
+// Pre-fill escape protocol fields from drafts on init
+const _origInitEP = initEscapeProtocol;
+initEscapeProtocol = function() {
+  _origInitEP();
+  // Also load proto drafts into fields
+  PROTO_ITEMS.forEach((item, i) => {
+    const el = document.getElementById('final-q' + (i+1));
+    if(el && _protoDrafts[item.id] && !el.value) {
+      el.value = _protoDrafts[item.id];
+    }
+  });
+};
+
+// ── Dupe warning for Evidence Keeper ─────────────────────────────
+const _ART_KEYWORDS = {};
+function _getKeywords(name) {
+  if(!name) return [];
+  return name.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(' ').filter(w=>w.length>3);
+}
+
+function checkDuplicate(id, name) {
+  const newKW = _getKeywords(name);
+  for(const savedId of S.locker) {
+    const savedName = ART_NAMES[savedId] || savedId;
+    const savedKW = _getKeywords(savedName);
+    const overlap = newKW.filter(w => savedKW.includes(w));
+    if(overlap.length >= 2) {
+      return savedName; // return name of similar item
+    }
+  }
+  return null;
+}
+
+// Override saveArt to add dupe warning
+const _origSaveArt = saveArt;
+saveArt = async function(id, name, room, type, provenance) {
+  if(!S.locker.includes(id)) {
+    const similar = checkDuplicate(id, name);
+    if(similar) {
+      showToast('Possible Duplicate', `"${name}" may overlap with "${similar}" already in your locker. Saving anyway — check your curation.`, 5000);
+    }
+  }
+  return _origSaveArt(id, name, room, type, provenance);
+};
+
+// ── Three-tier provenance for later rooms ─────────────────────────
+function renderThreeTierProv(containerId, artifactLabel, onSubmit) {
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = `
+    <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--gi);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Provenance assessment: ${artifactLabel}</div>
+    <div style="font-family:'Crimson Pro',serif;font-size:0.76rem;color:var(--sm);margin-bottom:8px;font-style:italic;">
+      <strong style="color:var(--vd);">Authentic</strong> — original, unmodified, traceable chain of custody.<br>
+      <strong style="color:var(--go);">Derivative</strong> — based on an authentic source, but summarized, edited, or repackaged.<br>
+      <strong style="color:var(--smon-c);">Questionable</strong> — chain of custody is broken, unclear, or the source conflicts with itself.
+    </div>
+    <div class="prov-tier-wrap">
+      <button class="prov-tier-btn authentic"  onclick="_selectTier(this,'authentic','${containerId}',${JSON.stringify(onSubmit)})">Authentic</button>
+      <button class="prov-tier-btn derivative" onclick="_selectTier(this,'derivative','${containerId}',${JSON.stringify(onSubmit)})">Derivative</button>
+      <button class="prov-tier-btn questionable" onclick="_selectTier(this,'questionable','${containerId}',${JSON.stringify(onSubmit)})">Questionable</button>
+    </div>
+    <div id="${containerId}-result" style="display:none;margin-top:6px;" class="task-feedback"></div>`;
+}
+
+function _selectTier(btn, tier, containerId, cb) {
+  btn.parentElement.querySelectorAll('.prov-tier-btn').forEach(b=>{ b.disabled=true; b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  const result = document.getElementById(containerId+'-result');
+  const msgs = {
+    authentic:   'Authentic provenance noted. This source can anchor a direct claim.',
+    derivative:  'Derivative provenance noted. This source transmits an argument — ask whose argument it was originally.',
+    questionable:'Questionable provenance flagged. Any claim resting on this source needs explicit limitation language.'
+  };
+  if(result) { result.textContent = msgs[tier]; result.style.display='block'; }
+  if(typeof cb === 'function') cb(tier);
+}
+
+// ── Analyst: add custom absence categories ───────────────────────
+const _customCategories = [];
+
+function addCustomCategory() {
+  const input = document.getElementById('custom-cat-input');
+  if(!input || !input.value.trim()) return;
+  const val = input.value.trim();
+  _customCategories.push(val);
+  S.voices.push(val);
+  updateVoiceTally();
+  input.value = '';
+  // Append to category map
+  const map = document.getElementById('analyst-cats');
+  if(map) {
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    row.style.borderColor = 'rgba(122,106,170,0.2)';
+    const idx = _customCategories.length;
+    row.innerHTML = `
+      <div class="cat-label" style="color:rgba(122,106,170,0.85);">${val} <em style="font-size:0.7rem;color:var(--sm);">(added by you)</em></div>
+      <select class="arch-select cat-select" data-cat="custom_${idx}" style="border-color:rgba(122,106,170,0.3);">
+        <option value="">Classify...</option>
+        <option value="present">Present — listed as a source type</option>
+        <option value="absent">Absent — not mentioned</option>
+        <option value="structural">Structurally excluded — archive not built for this</option>
+      </select>`;
+    map.appendChild(row);
+  }
+  // Update voices panel
+  const vc = document.getElementById('vc-pro') || document.getElementById('vc-r1');
+  if(vc) {
+    const item = document.createElement('div');
+    item.className = 'voices-cat-item';
+    item.innerHTML = `<strong>${val}</strong> — <em style="font-size:0.68rem;opacity:0.75;">Added by analyst</em>`;
+    const list = vc.querySelector('.voices-cat-list') || vc;
+    list.appendChild(item);
+  }
+  showToast('Category added', `"${val}" added to your source map.`);
+}
+
+// ── Cross-room synthesis question for Analyst ─────────────────────
+const SYNTHESIS_QS = {
+  room1: 'You began with a sparse archive. What source types were absent from the curated record? Were those absences a matter of oversight — or curation?',
+  room2: 'Now there is abundance. Did saturation make absence harder to see, or easier? Name one voice that was still missing despite the volume of sources.',
+  room3: 'The same claim echoed across multiple sources. Did repetition produce the impression of verification? What source types were still excluded from the echo chain?',
+  room4: 'The algorithm shaped what you saw. Did the feed\'s absences follow the same pattern as the archive\'s, or a different one? What does that tell you about how exclusion travels across platforms?',
+  room5: 'The synthetic summary felt complete. What was still not there? Is "completeness" a property of the source — or of the reader\'s expectations?',
+};
+
+function injectSynthesisQ(room) {
+  if(S.role !== 'analyst') return;
+  const q = SYNTHESIS_QS[room];
+  if(!q) return;
+  // Find the room's main content area
+  const contentId = { room1:'r1-content', room2:'r2-content', room3:'r3-content', room4:'r4-content', room5:'r5-content' }[room];
+  const el = document.getElementById(contentId);
+  if(!el) return;
+  // Only inject once
+  if(el.querySelector('.synthesis-block')) return;
+  el.insertAdjacentHTML('beforeend', `
+    <div class="synthesis-block">
+      <div class="synthesis-label">Analyst — Cross-Room Synthesis</div>
+      <div class="synthesis-q">${q}</div>
+      <textarea class="arch-textarea" id="syn-q-${room}" style="min-height:60px;" placeholder="Your response..."></textarea>
+      <button class="btn-task" style="margin-top:0.4rem;" onclick="saveSynthesisQ('${room}')">Save synthesis note</button>
+      <div id="syn-ok-${room}" style="display:none;" class="task-feedback">Synthesis note saved.</div>
+    </div>`);
+}
+
+async function saveSynthesisQ(room) {
+  const el = document.getElementById('syn-q-' + room);
+  if(!el || el.value.trim().length < 10) { showToast('More detail needed','Write at least one sentence before saving.'); return; }
+  document.getElementById('syn-ok-' + room).style.display = 'block';
+  _protoDrafts['proto_historical'] = (_protoDrafts['proto_historical']||'') + '\n[Synthesis ' + room + '] ' + el.value.trim();
+  showSubmitConfirm(document.getElementById('syn-ok-' + room), 'Synthesis note saved', 'This has been added to your Protocol draft.');
+  await post({ action:'saveResponse', session_id:S.sessionId, student_name:S.studentName,
+    room, task_id:'ANAL_SYN_'+room, task_label:'Cross-room synthesis: '+room,
+    response_type:'synthesis', response_value:el.value.trim(), is_correct:true, signal_delta:0.5,
+    standards_addressed:'AS-2,HS-6', skill_category:'Contextualization' });
+}
+
+// ── Signal matrix for Signal Monitor ─────────────────────────────
+const SIG_MATRIX_DATA = [
+  { cat:'Official stamps / seals',      pro:'✓', r1:'✓', r2:'✓', r3:'—', r4:'—', r5:'—' },
+  { cat:'Named institutional authority', pro:'✓', r1:'✓', r2:'✓', r3:'✓', r4:'—', r5:'✓' },
+  { cat:'Claim of comprehensiveness',   pro:'✓', r1:'✓', r2:'—', r3:'—', r4:'—', r5:'✓' },
+  { cat:'Formal classification numbers',pro:'✓', r1:'✓', r2:'—', r3:'—', r4:'—', r5:'—' },
+  { cat:'Engagement metrics / likes',   pro:'—', r1:'—', r2:'—', r3:'—', r4:'✓', r5:'—' },
+  { cat:'Professional production values',pro:'—', r1:'—', r2:'✓', r3:'✓', r4:'✓', r5:'✓' },
+  { cat:'Peer / citation count',        pro:'—', r1:'—', r2:'—', r3:'✓', r4:'—', r5:'—' },
+  { cat:'Algorithmic ranking',          pro:'—', r1:'—', r2:'—', r3:'—', r4:'✓', r5:'—' },
+  { cat:'Aesthetic cues (lighting/edit)',pro:'—', r1:'—', r2:'✓', r3:'✓', r4:'✓', r5:'✓' },
+  { cat:'AI-asserted accuracy',         pro:'—', r1:'—', r2:'—', r3:'—', r4:'—', r5:'✓' },
+];
+
+function renderSigMatrix(containerId) {
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const rooms = ['Pro','R1','R2','R3','R4','R5'];
+  el.innerHTML = `
+    <table class="sig-matrix" role="table" aria-label="Trust signal presence by room">
+      <thead>
+        <tr>
+          <th>Signal type</th>
+          ${rooms.map(r=>`<th>${r}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${SIG_MATRIX_DATA.map(row=>`
+          <tr>
+            <td>${row.cat}</td>
+            <td class="${row.pro==='✓'?'present':'absent'}">${row.pro}</td>
+            <td class="${row.r1==='✓'?'present':'absent'}">${row.r1}</td>
+            <td class="${row.r2==='✓'?'present':'absent'}">${row.r2}</td>
+            <td class="${row.r3==='✓'?'present':'absent'}">${row.r3}</td>
+            <td class="${row.r4==='✓'?'present':'absent'}">${row.r4}</td>
+            <td class="${row.r5==='✓'?'present':'absent'}">${row.r5}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ── Aesthetic cue prompts for Signal Monitor ─────────────────────
+const AESTHETIC_PROMPTS = {
+  room2: 'Look at the visual design of these broadcast sources before reading any text. What does the production quality — lighting, framing, editing — signal about credibility? Is that signal earned?',
+  room3: 'The citation chain travels through different media formats. Does the visual register of each source affect how you read its authority? Should it?',
+  room4: 'In the feed, thumbnails and video previews precede text. What trust signals do they carry — and are those signals attached to any argument, or just to affect?',
+  room5: 'The AI-generated summary has no visual "tells" — no letterhead, no author photo, no production budget. What does the absence of aesthetic signals do to your sense of its authority?',
+};
+
+function injectAestheticPrompt(room) {
+  if(S.role !== 'signal') return;
+  const q = AESTHETIC_PROMPTS[room];
+  if(!q) return;
+  const contentId = { room2:'r2-content', room3:'r3-content', room4:'r4-content', room5:'r5-content' }[room];
+  const el = document.getElementById(contentId);
+  if(!el || el.querySelector('.aesthetic-prompt')) return;
+  el.insertAdjacentHTML('afterbegin', `
+    <div class="aesthetic-prompt synthesis-block" style="border-color:rgba(160,104,48,0.3);background:rgba(160,104,48,0.05);">
+      <div class="synthesis-label" style="color:var(--smon-c);">Signal Monitor — Aesthetic Audit</div>
+      <div class="synthesis-q">${q}</div>
+      <textarea class="arch-textarea" id="aest-q-${room}" style="min-height:54px;" placeholder="Note what you observe before reading for content..."></textarea>
+      <button class="btn-task" style="margin-top:0.4rem;" onclick="saveAestheticNote('${room}')">Save aesthetic audit note</button>
+      <div id="aest-ok-${room}" style="display:none;" class="task-feedback">Aesthetic audit note saved.</div>
+    </div>`);
+}
+
+async function saveAestheticNote(room) {
+  const el = document.getElementById('aest-q-' + room);
+  if(!el || el.value.trim().length < 10) { showToast('More detail needed','Describe at least one aesthetic cue before saving.'); return; }
+  document.getElementById('aest-ok-' + room).style.display = 'block';
+  showSubmitConfirm(document.getElementById('aest-ok-' + room), 'Aesthetic audit saved', 'Aesthetic cues are trust signals too.');
+  await post({ action:'saveResponse', session_id:S.sessionId, student_name:S.studentName,
+    room, task_id:'SIG_AEST_'+room, task_label:'Aesthetic audit: '+room,
+    response_type:'aesthetic_audit', response_value:el.value.trim(), is_correct:true, signal_delta:0.5,
+    standards_addressed:'AS-4,HS-5', skill_category:'Argumentation' });
+}
+
+// ── Star / filter for Lead Auditor (Rooms 2–4) ────────────────────
+const _starredSources = new Set();
+let _filterMode = 'all'; // 'all' | 'starred' | 'unreviewed'
+const _reviewedSources = new Set();
+
+function toggleStar(id, btn) {
+  if(_starredSources.has(id)) {
+    _starredSources.delete(id);
+    btn.classList.remove('starred');
+    btn.setAttribute('aria-label','Star this source');
+  } else {
+    _starredSources.add(id);
+    btn.classList.add('starred');
+    btn.setAttribute('aria-label','Unstar this source');
+    showToast('Starred','Source marked as pivotal. Use the filter bar to review starred items.', 2000);
+  }
+  applySourceFilter();
+}
+
+function markReviewed(id) {
+  _reviewedSources.add(id);
+}
+
+function setFilter(mode, btn) {
+  _filterMode = mode;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  applySourceFilter();
+}
+
+function applySourceFilter() {
+  // Find all source cards with data-source-id
+  document.querySelectorAll('[data-source-id]').forEach(card => {
+    const id = card.dataset.sourceId;
+    let show = true;
+    if(_filterMode === 'starred') show = _starredSources.has(id);
+    if(_filterMode === 'unreviewed') show = !_reviewedSources.has(id);
+    card.style.display = show ? '' : 'none';
+  });
+}
+
+// ── Wire synthesis and aesthetic prompts into room builders ───────
+const _origBuildRoom2 = buildRoom2;
+buildRoom2 = function() {
+  _origBuildRoom2();
+  setTimeout(()=>{
+    injectSynthesisQ('room2');
+    injectAestheticPrompt('room2');
+    if(S.role==='signal') renderSigMatrix('sig-matrix-r2');
+  }, 200);
+};
+
+const _origBuildRoom3 = buildRoom3;
+buildRoom3 = function() {
+  _origBuildRoom3();
+  setTimeout(()=>{
+    injectSynthesisQ('room3');
+    injectAestheticPrompt('room3');
+    if(S.role==='signal') renderSigMatrix('sig-matrix-r3');
+  }, 200);
+};
+
+const _origBuildRoom4 = buildRoom4;
+buildRoom4 = function() {
+  _origBuildRoom4();
+  setTimeout(()=>{
+    injectSynthesisQ('room4');
+    injectAestheticPrompt('room4');
+    if(S.role==='signal') renderSigMatrix('sig-matrix-r4');
+  }, 200);
+};
+
+const _origBuildRoom5 = buildRoom5;
+buildRoom5 = function() {
+  _origBuildRoom5();
+  setTimeout(()=>{
+    injectSynthesisQ('room5');
+    injectAestheticPrompt('room5');
+    if(S.role==='signal') renderSigMatrix('sig-matrix-r5');
+  }, 200);
+};
+
+// Initialize protocol checklist on game start
+const _origStartGame = startGame;
+startGame = async function() {
+  await _origStartGame();
+  setTimeout(updateProtocolChecklist, 500);
+};
