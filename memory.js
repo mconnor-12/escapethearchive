@@ -1760,6 +1760,7 @@ function checkAllEuph() {
     document.getElementById('euph-ok').innerHTML = 
       '<strong>All three decoded.</strong> Official language transforms coercion into administration. Now examine the photograph and unlock the witness accounts.';
     document.getElementById('lead-task2-card').classList.add('complete');
+    S.r1.euphDone = true; // ← was missing: drag-drop path never set this
     document.getElementById('witness-drawer').classList.add('ready');
     const _wd1=document.getElementById('witness-drawer');
     _wd1.querySelector('.drawer-icon').textContent='🔓';
@@ -1811,12 +1812,15 @@ async function submitPhotoClaims() {
   document.getElementById('lead-task3-card').classList.add('complete');
   if(!document.getElementById('witness-drawer').classList.contains('ready') &&
      Object.values(_euphCorrectDnd).every(Boolean)) {
+    S.r1.euphDone = true; // sync state
     document.getElementById('witness-drawer').classList.add('ready');
   const _wd2=document.getElementById('witness-drawer');
   _wd2.querySelector('.drawer-icon').textContent='🔓';
   _wd2.querySelector('.drawer-text').textContent='Witness Accounts — ✓ Analysis complete. Click here to access the testimony.';
   _wd2.style.border='1px solid rgba(74,138,114,0.5)';
   _wd2.style.background='rgba(74,138,114,0.08)';
+  } else if(Object.values(_euphCorrectDnd).every(Boolean)) {
+    S.r1.euphDone = true; // ensure sync even if drawer already ready
   }
   earnTrajectoryAction('r1_claim_correct');
   await post({action:'saveResponse', session_id:S.sessionId, student_name:S.studentName,
@@ -2419,8 +2423,15 @@ async function unlockWitness(){
   if(S.r1.witnessUnlocked) return;
   const drawer=document.getElementById('witness-drawer');
   if(!drawer.classList.contains('ready')&&S.role!=='lead') return;
-  // for lead: require euph done
-  if(S.role==='lead'&&!S.r1.euphDone){showToast('Decode First','Complete the euphemism decoder before accessing the testimony.');return;}
+  // for lead: require euph done -- check both paths (DnD and select)
+  const _dndDone = typeof _euphCorrectDnd !== 'undefined' && Object.values(_euphCorrectDnd).every(Boolean);
+  const _euphReadyAny = S.r1.euphDone || _dndDone || drawer.classList.contains('ready');
+  if(S.role==='lead' && !_euphReadyAny){
+    showToast('Decode First','Complete the euphemism decoder before accessing the testimony.');
+    return;
+  }
+  // Sync euphDone so future checks pass
+  if(_dndDone) S.r1.euphDone = true;
   S.r1.witnessUnlocked=true;
   drawer.style.display='none';
   const t=document.getElementById('testimony-r1');
