@@ -368,16 +368,22 @@
                 <div class="hotspot-grid" id="lead-hotspots">
                   <div class="hotspot" id="hs-date" tabindex="0" role="button" aria-label="Examine document date" onclick="revealHotspot('date')">
                     <div class="hs-label">Document Date: September 14, 1944</div>
+                  <button class="hs-examine-btn" onclick="revealHotspot('date')" tabindex="0">Examine this area →</button>
+                
                     <div class="hs-prompt">Click to examine</div>
                     <div class="hs-reveal" id="hsr-date">The document is dated 1944 but claims to document events from 1942 to 1945 &mdash; including events that had not yet happened when it was written. A record cannot be contemporary with events it has not yet witnessed.</div>
                   </div>
                   <div class="hotspot" id="hs-caption" tabindex="0" role="button" aria-label="Examine caption language" onclick="revealHotspot('caption')">
                     <div class="hs-label">&ldquo;voluntarily relocate&rdquo;</div>
+                  <button class="hs-examine-btn" onclick="revealHotspot('caption')" tabindex="0">Examine this area →</button>
+                
                     <div class="hs-prompt">Click to examine</div>
                     <div class="hs-reveal" id="hsr-caption">Executive Order 9066 authorized forced removal under military authority. The word &ldquo;voluntary&rdquo; does ideological work while appearing merely descriptive. The caption is an argument, not a description.</div>
                   </div>
                   <div class="hotspot" id="hs-scope" tabindex="0" role="button" aria-label="Examine scope claim" onclick="revealHotspot('scope')">
                     <div class="hs-label">&ldquo;comprehensive account of life on the American home front&rdquo;</div>
+                  <button class="hs-examine-btn" onclick="revealHotspot('scope')" tabindex="0">Examine this area →</button>
+                
                     <div class="hs-prompt">Click to examine</div>
                     <div class="hs-reveal" id="hsr-scope">The exhibit lists three source types: government correspondence, photographs, and public information campaigns. All three are government-produced. &ldquo;Comprehensive&rdquo; is a claim the source list does not support.</div>
                   </div>
@@ -1054,6 +1060,13 @@
       <button onclick="dismissOnboarding()" style="background:transparent;border:none;font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--sm);letter-spacing:0.1em;cursor:pointer;text-decoration:underline;text-transform:uppercase;">Skip — I know how this works</button>
     </div>
   </div>
+</div>
+
+
+<!-- High-contrast mode notice -->
+<div class="hc-notice" role="status">
+  High contrast mode detected. All interactive areas have bold borders.<br>
+  Use Tab to navigate between hotspots and press Enter to examine.
 </div>
 
 </body>

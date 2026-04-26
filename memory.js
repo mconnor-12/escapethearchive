@@ -6062,3 +6062,50 @@ startGame = ((_prevStartGame3) => async function() {
   await _prevStartGame3();
   setTimeout(updateProtocolChecklist, 500);
 })(startGame);
+
+
+// ── Hotspot rescue: show hint after repeated failed clicks ────────
+let _hsAreaClicks = 0;
+let _hsRescueShown = false;
+
+document.addEventListener('click', function(e) {
+  // If we're on prologue step 2, lead role, hotspots not all done
+  if(S.role !== 'lead' || S.pro.roleTaskDone) return;
+  const grid = document.getElementById('lead-hotspots');
+  if(!grid || !grid.offsetParent) return; // not visible
+  
+  // Check if click was near the hotspot grid area
+  const rect = grid.getBoundingClientRect();
+  const expanded = { top: rect.top - 80, bottom: rect.bottom + 80,
+                     left: rect.left - 80, right: rect.right + 80 };
+  if(e.clientX >= expanded.left && e.clientX <= expanded.right &&
+     e.clientY >= expanded.top  && e.clientY <= expanded.bottom) {
+    _hsAreaClicks++;
+    if(_hsAreaClicks >= 4 && !_hsRescueShown && _hotspotsRevealed.size < 3) {
+      _hsRescueShown = true;
+      showHotspotRescue();
+    }
+  }
+});
+
+function showHotspotRescue() {
+  const grid = document.getElementById('lead-hotspots');
+  if(!grid) return;
+  const rescue = document.createElement('div');
+  rescue.id = 'hs-rescue';
+  rescue.style.cssText = 'margin-top:0.75rem;background:rgba(201,152,42,0.08);border:1px solid rgba(201,152,42,0.3);padding:0.6rem 0.8rem;';
+  rescue.innerHTML = `
+    <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--go);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:5px;">
+      Having trouble finding the hotspots?
+    </div>
+    <div style="font-family:'Crimson Pro',serif;font-size:0.8rem;color:var(--pd);margin-bottom:8px;">
+      Each of the three shaded areas below is clickable. Look for the gold pulsing border, or use the "Examine" buttons.
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn-task" style="width:auto;margin:0;" onclick="revealHotspot('date');document.getElementById('hs-rescue')?.remove();">Examine: Document date</button>
+      <button class="btn-task" style="width:auto;margin:0;" onclick="revealHotspot('caption');document.getElementById('hs-rescue')?.remove();">Examine: Caption language</button>
+      <button class="btn-task" style="width:auto;margin:0;" onclick="revealHotspot('scope');document.getElementById('hs-rescue')?.remove();">Examine: Scope claim</button>
+    </div>`;
+  grid.insertAdjacentElement('afterend', rescue);
+  showToast('Hint unlocked', 'The examination buttons are now visible below the hotspot area.', 5000);
+}

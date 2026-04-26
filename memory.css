@@ -1151,3 +1151,126 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   text-transform: uppercase;
   margin-bottom: 2px;
 }
+
+/* ================================================================
+   FORCED COLORS / HIGH CONTRAST MODE SUPPORT
+   ================================================================ */
+
+@media (forced-colors: active) {
+  /* Hotspots must be explicitly visible */
+  .hotspot {
+    border: 3px solid ButtonText !important;
+    background: Canvas !important;
+    forced-color-adjust: none;
+  }
+  .hotspot:not(.revealed) {
+    border-color: Highlight !important;
+    outline: 2px dashed Highlight;
+  }
+  .hotspot:hover {
+    background: Highlight !important;
+    color: HighlightText !important;
+  }
+  .hotspot.revealed {
+    border-color: ButtonText !important;
+    opacity: 0.6;
+  }
+  .hs-label { color: ButtonText !important; }
+  .hs-prompt { color: Highlight !important; }
+  .hs-examine-btn {
+    display: inline-block !important; /* always show in HC mode */
+  }
+
+  /* Buttons */
+  .btn-gold, .btn-task {
+    border: 2px solid ButtonText !important;
+    background: ButtonFace !important;
+    color: ButtonText !important;
+    forced-color-adjust: none;
+  }
+  .btn-ghost {
+    border: 1px solid ButtonText !important;
+    color: ButtonText !important;
+  }
+
+  /* Prov & sig buttons */
+  .prov-btn, .sig-rate-btn, .prov-tier-btn {
+    border: 2px solid ButtonText !important;
+    color: ButtonText !important;
+    background: Canvas !important;
+  }
+  .prov-btn:hover, .sig-rate-btn:hover {
+    background: Highlight !important;
+    color: HighlightText !important;
+  }
+  .sig-rate-btn.selected, .prov-btn.selected {
+    background: Highlight !important;
+    color: HighlightText !important;
+    border-color: Highlight !important;
+  }
+
+  /* Inputs */
+  .arch-textarea, .arch-input, .arch-select {
+    border: 1px solid ButtonText !important;
+    background: Canvas !important;
+    color: CanvasText !important;
+  }
+
+  /* Progress bar */
+  .room-progress-bar-fill { background: Highlight !important; }
+  .room-progress-bar-track { border: 1px solid ButtonText; }
+
+  /* Locker */
+  .locker-chip { border: 1px solid ButtonText !important; }
+  .locker-chip-undo { color: LinkText !important; }
+
+  /* Submit confirm */
+  .submit-confirm-banner {
+    border: 2px solid Highlight !important;
+    background: Canvas !important;
+    color: CanvasText !important;
+  }
+}
+
+/* ── Hotspot examine button (always-visible fallback) ─────────── */
+.hs-examine-btn {
+  display: none; /* hidden in normal mode — shown in HC mode + as fallback */
+  margin-top: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid rgba(201,152,42,0.4);
+  color: var(--go);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.hs-examine-btn:hover {
+  background: rgba(201,152,42,0.15);
+}
+/* Always show examine button when hotspot is unrevealed on touch devices */
+@media (hover: none) {
+  .hotspot:not(.revealed) .hs-examine-btn {
+    display: inline-block;
+  }
+}
+
+/* ── HC mode reset notice ─────────────────────────────────────── */
+.hc-notice {
+  display: none;
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 300;
+  background: Canvas;
+  border: 2px solid Highlight;
+  color: CanvasText;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  padding: 0.5rem 0.75rem;
+  letter-spacing: 0.08em;
+}
+@media (forced-colors: active) {
+  .hc-notice { display: block; }
+}
