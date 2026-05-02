@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About the Project — Escape the Archive</title>
+<link rel="stylesheet" href="memory.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── PAGE-SPECIFIC OVERRIDES ── */
+  :root {
+    --ink:     #1a1208;
+    --ink2:    #3d2f1a;
+    --paper:   #f5f0e8;
+    --paper2:  #ede5d4;
+    --paper3:  #ddd3bc;
+    --rust:    #8b3a2a;
+    --rust2:   #c0532e;
+    --gold:    #b8962a;
+    --gold2:   #d4ad3a;
+    --sepia:   #6b5230;
+    --sepia2:  #8b6f47;
+    --teal:    #2a5f5c;
+    --teal2:   #3d7d79;
+    --cream:   #faf7f0;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  /* ── SITE NAV ── */
+  .site-nav {
+    background: var(--ink);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    border-bottom: 3px solid var(--rust);
+  }
+  .site-nav a.logo {
+    font-family: 'Playfair Display', serif;
+    color: var(--paper);
+    font-size: 1rem;
+    padding: 0.9rem 0;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+  .site-nav a.logo span { color: var(--gold2); }
+  .nav-links { display: flex; list-style: none; gap: 0; }
+  .nav-links a {
+    display: block;
+    color: var(--paper2);
+    text-decoration: none;
+    padding: 0.9rem 1rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover   { color: var(--gold2); }
+  .nav-links a.active  { color: var(--gold2); border-bottom: 2px solid var(--gold2); }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg,  transparent, transparent 47px, rgba(184,150,42,.06) 47px, rgba(184,150,42,.06) 48px),
+      repeating-linear-gradient(90deg, transparent, transparent 47px, rgba(184,150,42,.04) 47px, rgba(184,150,42,.04) 48px);
+    pointer-events: none;
+  }
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold2);
+    margin-bottom: 1.2rem;
+    position: relative;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 6vw, 3.8rem);
+    line-height: 1.15;
+    position: relative;
+    margin-bottom: 1.4rem;
+  }
+  .hero h1 em { font-style: italic; color: var(--gold2); }
+  .hero-sub {
+    max-width: 620px;
+    margin: 0 auto;
+    font-size: 1.05rem;
+    color: rgba(245,240,232,0.75);
+    line-height: 1.75;
+    position: relative;
+  }
+
+  /* ── LAYOUT ── */
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 2rem; }
+
+  section { padding: 4rem 0; border-bottom: 1px solid var(--paper3); }
+  section:last-of-type { border-bottom: none; }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sepia2);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.7rem;
+  }
+  .eyebrow::after { content: ''; flex: 1; height: 1px; background: var(--paper3); }
+
+  section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    line-height: 1.2;
+    margin-bottom: 1.2rem;
+  }
+  section h2 em { font-style: italic; color: var(--rust2); }
+
+  p { color: var(--ink2); margin-bottom: 1rem; max-width: 680px; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── TWO-COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: start; }
+  @media (max-width: 660px) { .two-col { grid-template-columns: 1fr; gap: 2rem; } }
+
+  /* ── PULL QUOTE ── */
+  .pull-quote {
+    border-left: 4px solid var(--rust);
+    padding: 1.4rem 1.6rem;
+    background: var(--cream);
+    margin: 2.5rem 0;
+    position: relative;
+  }
+  .pull-quote::before {
+    content: '\201C';
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    color: var(--rust);
+    opacity: 0.15;
+    position: absolute;
+    top: -0.6rem;
+    left: 0.6rem;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .pull-quote p {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.12rem;
+    color: var(--ink);
+    line-height: 1.65;
+    max-width: none;
+    margin-bottom: 0.5rem;
+  }
+  .pull-quote cite {
+    font-size: 0.72rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sepia2);
+    font-style: normal;
+  }
+
+  /* ── THEORY CARDS ── */
+  .theory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+    margin-top: 2rem;
+  }
+  .theory-card {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1.6rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .theory-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: var(--gold2);
+  }
+  .theory-card .tc-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 2.4rem;
+    color: var(--gold2);
+    opacity: 0.18;
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .theory-card h4 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gold2);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .theory-card p {
+    font-size: 0.86rem;
+    line-height: 1.65;
+    color: rgba(245,240,232,0.75);
+    max-width: none;
+    margin: 0;
+  }
+
+  /* ── QUESTION STACK ── */
+  .question-stack { margin-top: 2rem; display: flex; flex-direction: column; gap: 0.9rem; }
+  .q-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1.1rem 1.3rem;
+    background: var(--cream);
+    border-left: 3px solid var(--gold);
+  }
+  .q-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .q-item p {
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink);
+    max-width: none;
+    margin: 0;
+  }
+
+  /* ── MODE STRIP ── */
+  .mode-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0;
+    border: 1px solid var(--paper3);
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+  .mode-item {
+    padding: 1.4rem 1.2rem;
+    border-right: 1px solid var(--paper3);
+    border-bottom: 1px solid var(--paper3);
+  }
+  .mode-item:last-child { border-right: none; }
+  .mode-icon { font-size: 1.5rem; margin-bottom: 0.5rem; display: block; }
+  .mode-label {
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: var(--teal);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 0.3rem;
+  }
+  .mode-desc { font-size: 0.82rem; color: var(--ink2); line-height: 1.55; max-width: none; margin: 0; }
+
+  /* ── COMMITMENT GRID ── */
+  .commit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.1rem;
+    margin-top: 2rem;
+  }
+  .commit-card {
+    background: var(--cream);
+    border: 1px solid var(--paper3);
+    border-top: 3px solid var(--teal);
+    padding: 1.3rem 1.4rem;
+  }
+  .commit-card .cc-icon { font-size: 1.3rem; margin-bottom: 0.5rem; }
+  .commit-card h4 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--teal);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .commit-card p { font-size: 0.86rem; line-height: 1.6; color: var(--ink2); max-width: none; margin: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    color: var(--paper2);
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.76rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.06em;
+    border-top: 3px solid var(--rust);
+  }
+  footer a { color: var(--gold2); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ── ANIMATION ── */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  .hero > * { animation: fadeUp 0.55s ease both; }
+  .hero .hero-label { animation-delay: 0.08s; }
+  .hero h1            { animation-delay: 0.22s; }
+  .hero .hero-sub     { animation-delay: 0.38s; }
+</style>
+</head>
+<body>
+
+<!-- SITE NAV -->
+<nav class="site-nav">
+  <a href="memory.html" class="logo">Escape the <span>Archive</span></a>
+  <ul class="nav-links">
+    <li><a href="memory.html">Play</a></li>
+    <li><a href="about.html" class="active">About the Project</a></li>
+    <li><a href="creator.html">About Me</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <p class="hero-label">About This Project</p>
+  <h1>What does it mean<br>for students to shape<br>the <em>archive itself</em>?</h1>
+  <p class="hero-sub">
+    Escape the Archive is an inquiry-based classroom experience built on a provocation: what if students didn't just read primary sources — but became responsible for what counts as evidence in the first place?
+  </p>
+</header>
+
+<main class="wrap">
+
+  <!-- THE PROVOCATION -->
+  <section>
+    <p class="eyebrow">The Central Provocation</p>
+    <h2>What if the <em>archive</em> isn't a given?</h2>
+    <div class="two-col">
+      <div>
+        <p>
+          Most history instruction hands students a finished record and asks them to read it carefully. The archive arrives as a settled thing — a collection of documents, photographs, and artifacts that represent the past. Students learn to analyze what's inside it.
+        </p>
+        <p>
+          But archives are made, not found. Every document in a collection got there because someone selected it, someone preserved it, someone decided it mattered — and thousands of other records didn't make that cut, or were never created at all.
+        </p>
+        <p>
+          <strong>Escape the Archive asks a different question:</strong> what if students didn't just interpret the archive, but participated in the ethical and intellectual work of building it?
+        </p>
+      </div>
+      <div>
+        <div class="pull-quote">
+          <p>Your memory is always coming through a frame — and constructed through a frame, whatever that frame is. What if we studied the frame instead of the history itself?</p>
+          <cite>In-class discussion, Spring 2026</cite>
+        </div>
+        <p style="font-size:0.88rem; color:var(--sepia2); margin-top:1rem;">
+          This question sits at the heart of the game. Students aren't passive readers of the archive — they're analysts, witnesses, curators, and signalers who shape what becomes legible as history.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY THIS MATTERS -->
+  <section>
+    <p class="eyebrow">Why It Matters</p>
+    <h2>History education has a <em>selection problem</em></h2>
+    <p>
+      Historical thinking frameworks in K–12 education almost universally ask students to interrogate sources — to evaluate authorship, corroborate across documents, contextualize within the period. These are real skills. But they take the archive as a starting point rather than as an object of inquiry.
+    </p>
+    <p>
+      Critical archival theory asks a harder question: not just <em>what does this document tell us</em>, but <em>why does this document exist</em>, <em>who decided to preserve it</em>, <em>what was refused</em>, and <em>what would the record look like if different communities had shaped it</em>?
+    </p>
+    <p>
+      For students in New York City's public schools — many of whom belong to communities whose histories are underrepresented, distorted, or absent from standard archives — this isn't an abstract theoretical question. It's personal.
+    </p>
+
+    <div class="theory-grid">
+      <div class="theory-card">
+        <span class="tc-num">01</span>
+        <h4>Selection</h4>
+        <p>Every archive is the product of decisions — what to keep, what to discard, what to digitize, what to leave in a box. Those decisions reflect power.</p>
+      </div>
+      <div class="theory-card">
+        <span class="tc-num">02</span>
+        <h4>Mediation</h4>
+        <p>Sources don't speak for themselves. They arrive through systems of classification, description, and access that shape what a reader can find and how.</p>
+      </div>
+      <div class="theory-card">
+        <span class="tc-num">03</span>
+        <h4>Refusal</h4>
+        <p>Silences in the archive aren't accidents. Communities have deliberately withheld records — as protection, as resistance, as sovereignty over their own stories.</p>
+      </div>
+      <div class="theory-card">
+        <span class="tc-num">04</span>
+        <h4>Agency</h4>
+        <p>Students can be archivists. When young people participate in acts of historical curation, the ethical stakes of the archive become concrete and urgent.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW THE GAME WORKS -->
+  <section>
+    <p class="eyebrow">How It Works</p>
+    <h2>Four roles. One <em>archive under pressure</em>.</h2>
+    <p>
+      Escape the Archive is a role-based escape room set inside a fictional archive that is being sorted, searched, and contested in real time. Students take on one of four roles — each with different access to the collection and different responsibilities for what gets preserved.
+    </p>
+    <p>
+      No single player has the full picture. The game is designed so that students must synthesize evidence across roles — and so that the difficulty of knowing what is true, what is reliable, and what has been deliberately obscured becomes part of the intellectual experience, not an obstacle to it.
+    </p>
+
+    <div class="mode-strip">
+      <div class="mode-item">
+        <span class="mode-icon">🔍</span>
+        <p class="mode-label">Lead Auditor</p>
+        <p class="mode-desc">Reviews the archive's evidence trail and makes final determinations about what gets included in the official record.</p>
+      </div>
+      <div class="mode-item">
+        <span class="mode-icon">📁</span>
+        <p class="mode-label">Evidence Keeper</p>
+        <p class="mode-desc">Tracks, organizes, and cross-references the documentary record — surfacing connections others might miss.</p>
+      </div>
+      <div class="mode-item">
+        <span class="mode-icon">📡</span>
+        <p class="mode-label">Signal Monitor</p>
+        <p class="mode-desc">Watches the information environment for bias, distortion, and manipulation — including algorithmic curation.</p>
+      </div>
+      <div class="mode-item">
+        <span class="mode-icon">👁️</span>
+        <p class="mode-label">Archive Analyst</p>
+        <p class="mode-desc">Reads across the collection for patterns, gaps, and silences — what the archive says and what it refuses to say.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE HARD QUESTIONS -->
+  <section>
+    <p class="eyebrow">The Questions Under the Game</p>
+    <h2>What the archive is really <em>asking</em></h2>
+    <p>
+      Every design decision in Escape the Archive is organized around a set of questions that don't have clean answers — questions that historians, archivists, and communities continue to debate. Students will encounter them not as discussion prompts, but as practical problems they have to navigate.
+    </p>
+
+    <div class="question-stack">
+      <div class="q-item">
+        <span class="q-mark">?</span>
+        <p>What makes something evidence? Who decides — and what are the stakes of that decision for communities whose records have been systematically destroyed or ignored?</p>
+      </div>
+      <div class="q-item">
+        <span class="q-mark">?</span>
+        <p>What is the difference between a document and a record? Between preservation and curation? Between an archive and a monument?</p>
+      </div>
+      <div class="q-item">
+        <span class="q-mark">?</span>
+        <p>When an algorithm surfaces some sources and buries others, is that neutral? What does it mean to audit the feed rather than just read what's in it?</p>
+      </div>
+      <div class="q-item">
+        <span class="q-mark">?</span>
+        <p>What are the ethics of testimony? When someone tells you something, what do you owe them — as a listener, as a recorder, as someone who will pass that account on?</p>
+      </div>
+      <div class="q-item">
+        <span class="q-mark">?</span>
+        <p>If students help build the archive, what are they responsible for? What does it mean to take the ordinary work of historical inquiry seriously?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMITMENTS -->
+  <section>
+    <p class="eyebrow">Design Commitments</p>
+    <h2>What we're <em>committed</em> to</h2>
+    <p>
+      These aren't values statements — they're constraints that shaped every decision in the game's design, from the roles students play to the sources they encounter.
+    </p>
+    <div class="commit-grid">
+      <div class="commit-card">
+        <div class="cc-icon">🧩</div>
+        <h4>Asset-Based Design</h4>
+        <p>Students bring sophisticated analytical thinking to complex material. The game trusts that and is designed for it — every role gives students real intellectual work to do.</p>
+      </div>
+      <div class="commit-card">
+        <div class="cc-icon">🔍</div>
+        <h4>Epistemic Honesty</h4>
+        <p>No source is neutral. No archive is complete. Those truths are built into the mechanics — not mentioned in a handout, but encountered as the structure of the experience.</p>
+      </div>
+      <div class="commit-card">
+        <div class="cc-icon">📢</div>
+        <h4>Voice & Representation</h4>
+        <p>Whose voices are in this archive? Who is absent? These questions are explicit — and the design surfaces them, rather than papering over them.</p>
+      </div>
+      <div class="commit-card">
+        <div class="cc-icon">🌱</div>
+        <h4>Living Project</h4>
+        <p>The archive grows. Contributions from students, educators, and community members are welcome — and the <a href="contribute.html" style="color:var(--teal);">contribution form</a> is built into the site.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    Escape the Archive &nbsp;·&nbsp; A Living Archival Project &nbsp;·&nbsp;
+    <a href="creator.html">About the Creator</a> &nbsp;·&nbsp;
+    <a href="contribute.html">Contribute a Source</a> &nbsp;·&nbsp;
+    <a href="memory.html">Play</a>
+  </p>
+</footer>
+
+</body>
+</html>
