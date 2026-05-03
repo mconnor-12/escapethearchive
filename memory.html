@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escape the Archive: Drowning in the Record</title>
+<link rel="stylesheet" href="memory.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── PAGE-LEVEL FIXES ── */
+
+/* FIX: No nested scroll containers — single scroll axis */
+html, body { height: auto; overflow-x: hidden; }
+#game-shell, #game-area { overflow: visible; }
+.room-wrap { overflow: visible; }
+
+/* FIX: Sticky proceed button — fixed bottom bar */
+#sticky-proceed {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--teal);
+  color: white;
+  padding: 1rem 2rem;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  z-index: 400;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 3px solid var(--gold2);
+  transition: background 0.2s;
+}
+#sticky-proceed:hover { background: var(--teal2); }
+/* Give body room so sticky bar doesn't cover content */
+body.has-sticky { padding-bottom: 60px; }
+
+/* FIX: Keyboard DnD chip selected state */
+.dnd-chip.kb-selected {
+  border-color: var(--gold2);
+  color: var(--gold2);
+  box-shadow: 0 0 0 2px var(--gold2);
+  outline: 2px solid var(--gold2);
+}
+
+/* FIX: Hotspot button visited state */
+.hotspot-btn.visited {
+  color: var(--gold2);
+  border-color: var(--gold);
+  background: rgba(212,173,58,0.08);
+}
+
+/* FIX: Role orientation box */
+.role-orientation {
+  background: rgba(42,95,92,0.18);
+  border-left: 3px solid var(--teal2);
+  padding: 1rem 1.3rem;
+  margin-bottom: 1.6rem;
+}
+.role-orientation .ro-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--teal2);
+  margin-bottom: 0.4rem;
+}
+.role-orientation .ro-text {
+  font-size: 0.9rem;
+  color: var(--paper2);
+  line-height: 1.7;
+}
+
+/* FIX: Progress label text */
+#progress-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+/* FIX: LocalStorage notice */
+.storage-notice {
+  background: rgba(107,82,48,0.25);
+  border: 1px solid var(--border-dim);
+  border-left: 3px solid var(--sepia2);
+  padding: 0.7rem 1rem;
+  font-size: 0.75rem;
+  color: var(--sepia2);
+  font-family: var(--font-mono);
+  margin-top: 0.5rem;
+  line-height: 1.6;
+}
+
+/* FIX: Signal buttons get aria-pressed styles */
+.sig-btn[aria-pressed="true"].earned   { border-color: var(--green-ok); color: #8ecf9e; background: rgba(58,122,74,0.15); }
+.sig-btn[aria-pressed="true"].unearned { border-color: var(--red-alert); color: #e89090; background: rgba(139,42,42,0.15); }
+
+/* Hotspot zone hidden by default — revealed by JS */
+#hotspot-zone { scroll-margin-top: 80px; }
+#prologue-proceed { scroll-margin-top: 80px; }
+.room-panel { scroll-margin-top: 0; }
+
+/* Tagging counter pill */
+.count-pill {
+  display: inline-block;
+  background: var(--border-dim);
+  color: var(--gold2);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 20px;
+  font-weight: 700;
+}
+</style>
+</head>
+<body>
+
+<!-- SITE NAV -->
+<nav class="site-nav">
+  <a href="memory.html" class="logo">Escape the <span>Archive</span></a>
+  <ul class="nav-links">
+    <li><a href="memory.html" class="active">Play</a></li>
+    <li><a href="about.html">About the Project</a></li>
+    <li><a href="creator.html">About Me</a></li>
+    <li><a href="contribute.html" class="cta">Contribute</a></li>
+  </ul>
+</nav>
+
+<!-- FIX: Sticky proceed bar -->
+<button id="sticky-proceed" aria-label="Proceed to next room">→</button>
+
+<!-- GAME SHELL -->
+<div id="game-shell">
+
+  <!-- LOADING SCREEN -->
+  <div id="loading-screen" style="position:fixed;inset:0;background:var(--bg-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;gap:1.2rem;">
+    <p class="loading-sub">Initializing archive</p>
+    <p class="loading-title">Escape the Archive</p>
+    <p class="loading-sub" style="margin-top:0.1rem;font-size:0.65rem;letter-spacing:0.2em;">Drowning in the Record</p>
+    <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+  </div>
+
+  <!-- ROLE SELECT SCREEN -->
+  <div id="role-screen" style="display:none;min-height:100vh;background:var(--bg-dark);padding:3rem 1.5rem;">
+    <div style="text-align:center;margin-bottom:2.5rem;">
+      <p style="font-family:var(--font-mono);font-size:0.66rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold2);margin-bottom:0.8rem;">Select your role</p>
+      <h2 style="font-family:var(--font-serif);font-size:clamp(1.8rem,4vw,2.8rem);color:var(--paper);margin-bottom:0.6rem;">Who are you in the archive?</h2>
+      <p style="color:var(--text-dim);font-size:0.9rem;max-width:520px;margin:0 auto;">Each role gives you different access to the collection — and different responsibilities for what gets preserved. You cannot switch once you begin.</p>
+    </div>
+
+    <div class="role-grid">
+      <div class="role-card" onclick="selectRole('lead',this)" tabindex="0" role="button" aria-label="Select Lead Auditor role" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectRole('lead',this);}">
+        <span class="role-icon" aria-hidden="true">🔍</span>
+        <p class="role-name">Lead Auditor</p>
+        <p class="role-tagline">What can be claimed?</p>
+        <p class="role-desc">You evaluate whether the archive's public-facing record does what it claims to do. You see artifacts first — and make final determinations about what gets included.</p>
+      </div>
+      <div class="role-card" onclick="selectRole('keeper',this)" tabindex="0" role="button" aria-label="Select Evidence Keeper role" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectRole('keeper',this);}">
+        <span class="role-icon" aria-hidden="true">📁</span>
+        <p class="role-name">Evidence Keeper</p>
+        <p class="role-tagline">What has been preserved?</p>
+        <p class="role-desc">You track, organize, and cross-reference the documentary record — surfacing connections others miss and flagging what's absent from the collection.</p>
+      </div>
+      <div class="role-card" onclick="selectRole('analyst',this)" tabindex="0" role="button" aria-label="Select Archive Analyst role" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectRole('analyst',this);}">
+        <span class="role-icon" aria-hidden="true">👁️</span>
+        <p class="role-name">Archive Analyst</p>
+        <p class="role-tagline">What does the record refuse to say?</p>
+        <p class="role-desc">You read across the collection for patterns, gaps, and silences — examining what the archive includes and what its omissions reveal about who built it.</p>
+      </div>
+      <div class="role-card" onclick="selectRole('signal',this)" tabindex="0" role="button" aria-label="Select Signal Monitor role" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectRole('signal',this);}">
+        <span class="role-icon" aria-hidden="true">📡</span>
+        <p class="role-name">Signal Monitor</p>
+        <p class="role-tagline">What is the feed showing you?</p>
+        <p class="role-desc">You watch the information environment for bias, distortion, and manipulation — including algorithmic curation. You decide which signals are earned and which are noise.</p>
+      </div>
+    </div>
+
+    <!-- Educator config -->
+    <div style="text-align:center;margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border-dim);">
+      <p style="color:var(--text-dim);font-size:0.75rem;font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.6rem;">Educator access — configure archive ledger</p>
+      <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+        <input class="game-input" id="sheets-url-input" style="max-width:360px;" placeholder="Paste Google Sheets web app URL…">
+        <button class="btn btn-ghost" onclick="saveSheetURL()">Save</button>
+        <button class="btn btn-ghost" onclick="testSheetURL()">Test connection</button>
+      </div>
+      <p style="color:var(--text-dim);font-size:0.68rem;margin-top:0.5rem;font-family:var(--font-mono);" id="sheets-status"></p>
+      <!-- FIX: LocalStorage notice -->
+      <div class="storage-notice" style="max-width:500px;margin:0.8rem auto 0;">
+        📋 Student responses are saved locally in this browser session, namespaced by role.
+        Each role session has separate storage. No data leaves this device unless a Sheets URL is configured above.
+        To clear saved responses, use your browser's "Clear site data" option.
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME AREA -->
+  <div id="game-area" style="display:none;">
+
+    <!-- ROOM HEADER -->
+    <div class="room-header" role="banner" aria-label="Room navigation">
+      <div>
+        <p class="room-label" id="room-label">Prologue</p>
+        <p class="room-title" id="room-title">The Intake Desk</p>
+      </div>
+      <!-- FIX: Progress dots — static, labeled, non-interactive -->
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem;">
+        <span id="progress-label" aria-live="polite">Prologue</span>
+        <div class="room-progress" role="img" aria-label="Progress: see progress-label above">
+          <div class="prog-dot active" aria-hidden="true"></div>
+          <div class="prog-dot" aria-hidden="true"></div>
+          <div class="prog-dot" aria-hidden="true"></div>
+          <div class="prog-dot" aria-hidden="true"></div>
+          <div class="prog-dot" aria-hidden="true"></div>
+          <div class="prog-dot" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROOM CONTENT -->
+    <div class="room-wrap">
+
+      <!-- ══ PROLOGUE ══ -->
+      <div class="room-panel visible" id="room-0">
+
+        <!-- FIX: Role-specific orientation box (populated by JS) -->
+        <div id="role-orientation-box" class="role-orientation" hidden>
+          <p class="ro-label" id="role-orientation-label"></p>
+          <p class="ro-text" id="role-orientation-text"></p>
+        </div>
+
+        <div class="task-box">
+          <p class="task-label">Your task — Prologue: The Intake Desk</p>
+          <p class="task-text">You have been granted access to a restricted archival collection. Before proceeding, you must complete the intake protocol: annotate the exhibit brief, examine three document 
+            <!-- FIX: Tooltip on "hotspots" -->
+            <span data-tip="hotspot" style="border-bottom:1px dashed var(--gold);cursor:help;" title="">hotspots</span>,
+            and acknowledge the 
+            <span data-tip="misalignment" style="border-bottom:1px dashed var(--gold);cursor:help;" title="">misalignments</span>
+            you discover.</p>
+        </div>
+
+        <!-- Exhibit brief with hotspots -->
+        <div class="document-frame">
+          <div class="doc-meta">
+            <span>Exhibit Brief</span>
+            <span>RESTRICTED — Level 2 Access</span>
+            <span>Archive Reference: ETA-2024-001</span>
+          </div>
+          <div class="doc-title">Preliminary Exhibit Packet: "Comprehensive Account of the 1943 Administrative Relocation"</div>
+          <div class="doc-body" style="margin-top:0.8rem;">
+            <p>This exhibit presents a comprehensive account of the administrative relocation procedures implemented during the 1943 wartime period. All records have been reviewed for accuracy and completeness. The archive certifies that the materials included represent the full documentary record available for this period.</p>
+            <p style="margin-top:0.8rem;">Sources include: official correspondence, administrative memoranda, photographic documentation, and government-certified witness accounts. Materials have been organized chronologically. Gaps in the record reflect <strong>voluntary non-participation</strong> by certain individuals who chose not to provide statements.</p>
+            <p style="margin-top:0.8rem;">The exhibit aims to present a neutral, <strong>comprehensive account</strong> of this historical period. This is an <strong>administrative relocation</strong> record compiled for educational and research purposes.</p>
+
+            <!-- FIX: Hotspots clearly labeled and keyboard-accessible -->
+            <div style="margin-top:1.2rem;">
+              <p style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold2);margin-bottom:0.6rem;">
+                🔎 Examine each highlighted phrase below — click or press Enter on all three to continue
+              </p>
+              <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+                <button class="btn btn-ghost hotspot-btn" data-hotspot="1" data-tip="hotspot"
+                  aria-expanded="false" aria-controls="hotspot-reveal-1"
+                  style="font-size:0.78rem;border-color:var(--gold);">
+                  🔎 "voluntary non-participation"
+                </button>
+                <button class="btn btn-ghost hotspot-btn" data-hotspot="2" data-tip="hotspot"
+                  aria-expanded="false" aria-controls="hotspot-reveal-2"
+                  style="font-size:0.78rem;border-color:var(--gold);">
+                  🔎 "comprehensive account"
+                </button>
+                <button class="btn btn-ghost hotspot-btn" data-hotspot="3" data-tip="hotspot"
+                  aria-expanded="false" aria-controls="hotspot-reveal-3"
+                  style="font-size:0.78rem;border-color:var(--gold);">
+                  🔎 "administrative relocation"
+                </button>
+              </div>
+            </div>
+
+            <div id="hotspot-reveal-1" hidden aria-live="polite" class="feedback-msg visible feedback-warn" style="margin-top:0.8rem;">
+              <strong>Auditor finding — "voluntary non-participation":</strong> This phrase attributes the absence of testimony to individual choice rather than structural coercion. Individuals who did not provide statements may have been unable to — due to incarceration, displacement, fear of reprisal, or lack of access to the process. The framing conceals the conditions that shaped participation.
+            </div>
+            <div id="hotspot-reveal-2" hidden aria-live="polite" class="feedback-msg visible feedback-warn" style="margin-top:0.8rem;">
+              <strong>Auditor finding — "comprehensive account":</strong> "Comprehensive" is a claim, not a description. Archives are never comprehensive — they are curated. The assertion of completeness discourages future researchers from looking for what's missing. Comprehensiveness is a rhetorical posture, not an empirical fact.
+            </div>
+            <div id="hotspot-reveal-3" hidden aria-live="polite" class="feedback-msg visible feedback-warn" style="margin-top:0.8rem;">
+              <strong>Auditor finding — "administrative relocation":</strong> This is a euphemism. The historical record elsewhere names this as forced removal, incarceration, or internment. The WRA's own style guide directed staff to use institutional language to minimize the coercive character of the program. Language choice is not neutral — it shapes what the reader understands happened.
+            </div>
+          </div>
+        </div>
+
+        <!-- Annotations — hidden until hotspot zone is revealed (JS reveals hotspot-zone, annotations come first) -->
+        <p class="section-head mt3">Step 1 — Intake Annotations</p>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem;line-height:1.65;">
+          Answer all three prompts. Your responses are logged to the archive ledger for your educator.
+          Once saved, you will unlock the hotspot examination above.
+        </p>
+
+        <div class="mb2">
+          <label for="annot-1" style="color:var(--paper2);font-size:0.85rem;display:block;margin-bottom:0.4rem;">1. What does this exhibit claim to be about?</label>
+          <textarea class="game-textarea" id="annot-1" aria-required="true" placeholder="In your own words, what does the exhibit say it documents?"></textarea>
+        </div>
+        <div class="mb2">
+          <label for="annot-2" style="color:var(--paper2);font-size:0.85rem;display:block;margin-bottom:0.4rem;">2. What sources does it say it draws from?</label>
+          <textarea class="game-textarea" id="annot-2" aria-required="true" placeholder="List the source types named in the brief."></textarea>
+        </div>
+        <div class="mb2">
+          <label for="annot-3" style="color:var(--paper2);font-size:0.85rem;display:block;margin-bottom:0.4rem;">3. What seems off, unclear, or worth investigating further?</label>
+          <textarea class="game-textarea" id="annot-3" aria-required="true" placeholder="Note anything that strikes you as a gap, a problem, or a question."></textarea>
+        </div>
+
+        <button class="btn btn-primary" id="annot-save-btn" onclick="saveAnnotations()">Save Annotations &amp; Unlock Hotspots</button>
+        <div class="feedback-msg" id="fb-annot" role="alert"></div>
+
+        <!-- Hotspot zone — hidden until annotations saved -->
+        <div id="hotspot-zone" hidden style="margin-top:1.5rem;">
+          <div class="feedback-msg visible feedback-info" style="margin-bottom:1rem;" role="status">
+            ✓ Annotations saved. Now click all three hotspot buttons in the exhibit brief above to examine the language.
+            The "Proceed to Room I" button will appear once all three are examined.
+          </div>
+        </div>
+
+        <!-- Proceed -->
+        <div id="prologue-proceed" hidden class="mt4" role="status" aria-live="polite">
+          <div class="feedback-msg visible feedback-ok">✓ All three hotspots examined. You've completed the intake protocol.</div>
+          <button class="btn btn-gold mt2" onclick="goToRoom(1)">Proceed to Room I →</button>
+        </div>
+      </div><!-- /room-0 -->
+
+      <!-- ══ ROOM I — CURATED SCARCITY ══ -->
+      <div class="room-panel" id="room-1">
+
+        <div id="role-orientation-box-r1" class="role-orientation" hidden></div>
+
+        <div class="task-box">
+          <p class="task-label">Room I — Curated Scarcity</p>
+          <p class="task-text">A small set of official records is available. Before additional evidence becomes accessible, you must decide whether to trust the administrative frame — and articulate what the scarcity itself might mean as evidence.</p>
+        </div>
+
+        <p class="section-head">Official Administrative Record</p>
+
+        <div class="document-frame">
+          <div class="doc-meta">
+            <span class="voice-tag voice-official">Official</span>
+            <span>War Relocation Authority · Memorandum 7-C · March 1943</span>
+          </div>
+          <div class="doc-title">Transfer Processing — Administrative Summary</div>
+          <div class="doc-body">All transfers were conducted in accordance with Executive Order 9066. Processing centers reported no significant incidents. Individuals were provided with storage arrangements for property and were informed of temporary housing provisions. Records of transfer completion are maintained at the regional office.</div>
+        </div>
+
+        <div class="document-frame">
+          <div class="doc-meta">
+            <span class="voice-tag voice-official">Official</span>
+            <span>Internal Memo · April 1943 · Classified Level B</span>
+          </div>
+          <div class="doc-title">Property Disposition — Note to File</div>
+          <div class="doc-body">Property disposal proceeded under standard provisions. Records indicate that in cases where storage was unavailable, property was disposed of by local authorities. Itemized records were not required for disposals under $50 in value. Documentation is incomplete for the March–April period due to administrative transition.</div>
+        </div>
+
+        <!-- Euphemism Decoder -->
+        <p class="section-head mt3">
+          Euphemism Decoder
+          <span style="font-size:0.72rem;color:var(--text-dim);font-family:var(--font-mono);text-transform:none;letter-spacing:0;"> — drag terms to matching phrases, or use the dropdown fallback</span>
+        </p>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;line-height:1.65;">
+          Each official phrase in the documents above conceals a plain-language reality.
+          Drag the term that most precisely describes what the phrase obscures.
+          <br><span style="font-size:0.78rem;">Keyboard users: press Enter on a term to select it, then Tab to a phrase and press Enter to place it.</span>
+        </p>
+
+        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1.2rem;" role="list" aria-label="Available terms to place">
+          <div class="dnd-chip" data-value="systematic destruction" role="option" aria-grabbed="false">systematic destruction</div>
+          <div class="dnd-chip" data-value="forced removal" role="option" aria-grabbed="false">forced removal</div>
+          <div class="dnd-chip" data-value="administrative delay" role="option" aria-grabbed="false">administrative delay</div>
+          <div class="dnd-chip" data-value="community testimony" role="option" aria-grabbed="false">community testimony</div>
+          <div class="dnd-chip" data-value="property seizure" role="option" aria-grabbed="false">property seizure</div>
+        </div>
+
+        <div style="display:grid;gap:0.9rem;" role="list" aria-label="Phrases to match">
+          <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+            <span style="color:var(--paper2);font-size:0.85rem;min-width:240px;font-style:italic;">"property disposed of by local authorities"</span>
+            <div class="dnd-zone" data-zone="euph-a" role="listitem" tabindex="0" aria-label="Drop zone for: property disposed of by local authorities" style="min-width:190px;">Drop here</div>
+          </div>
+          <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+            <span style="color:var(--paper2);font-size:0.85rem;min-width:240px;font-style:italic;">"transfer processing conducted"</span>
+            <div class="dnd-zone" data-zone="euph-b" role="listitem" tabindex="0" aria-label="Drop zone for: transfer processing conducted" style="min-width:190px;">Drop here</div>
+          </div>
+          <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+            <span style="color:var(--paper2);font-size:0.85rem;min-width:240px;font-style:italic;">"documentation is incomplete"</span>
+            <div class="dnd-zone" data-zone="euph-c" role="listitem" tabindex="0" aria-label="Drop zone for: documentation is incomplete" style="min-width:190px;">Drop here</div>
+          </div>
+        </div>
+
+        <details style="margin-top:1rem;">
+          <summary style="color:var(--text-dim);font-size:0.78rem;cursor:pointer;font-family:var(--font-mono);letter-spacing:0.06em;list-style:none;">
+            ▶ Use dropdown fallback instead (accessibility alternative)
+          </summary>
+          <div style="margin-top:0.8rem;display:grid;gap:0.6rem;">
+            <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap;">
+              <label for="euph-sel-a" style="color:var(--paper2);font-size:0.82rem;min-width:240px;font-style:italic;">"property disposed of…"</label>
+              <select class="game-select" id="euph-sel-a" aria-label="Match for: property disposed of by local authorities">
+                <option value="">— select —</option>
+                <option>systematic destruction</option>
+                <option>forced removal</option>
+                <option>administrative delay</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap;">
+              <label for="euph-sel-b" style="color:var(--paper2);font-size:0.82rem;min-width:240px;font-style:italic;">"transfer processing"</label>
+              <select class="game-select" id="euph-sel-b" aria-label="Match for: transfer processing conducted">
+                <option value="">— select —</option>
+                <option>systematic destruction</option>
+                <option>forced removal</option>
+                <option>administrative delay</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap;">
+              <label for="euph-sel-c" style="color:var(--paper2);font-size:0.82rem;min-width:240px;font-style:italic;">"documentation incomplete"</label>
+              <select class="game-select" id="euph-sel-c" aria-label="Match for: documentation is incomplete">
+                <option value="">— select —</option>
+                <option>systematic destruction</option>
+                <option>forced removal</option>
+                <option>administrative delay</option>
+              </select>
+            </div>
+            <button class="btn btn-ghost" style="width:fit-content;" onclick="checkEuph()">Check answers</button>
+          </div>
+        </details>
+
+        <div class="feedback-msg" id="fb-euph" role="alert"></div>
+
+        <div id="euph-drawer-btn" hidden style="margin-top:1rem;">
+          <button class="btn btn-teal" id="witness-toggle-btn" onclick="unlockWitness()">🔓 Access witness testimony</button>
+        </div>
+
+        <div class="witness-drawer mt2" id="witness-drawer" role="region" aria-label="Witness testimony">
+          <div class="witness-content">
+            <p class="section-head">Witness Testimony — Oral History Fragment</p>
+            <div class="document-frame" style="margin-bottom:0;">
+              <div class="doc-meta">
+                <span class="voice-tag voice-testimony">Testimony</span>
+                <span>Collected 1982 · Regional Oral History Project · Declassified 1992</span>
+              </div>
+              <div class="doc-body">
+                "They came in the morning. We had forty-eight hours — they said one suitcase each. My father's business records, thirty years of ledgers — gone. We were told there would be storage. There was no storage. We never saw those things again. When I asked after the war, they said the records had been 'administratively processed.' That's a phrase that means nothing happened and everything happened at the same time."
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Role-gated tasks -->
+        <div data-roles="lead" class="mt4">
+          <p class="section-head">Lead Judgment</p>
+          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;">Does the official record accurately represent what the evidence suggests occurred? Be specific about which claims hold and which don't.</p>
+          <label for="lead-judgment" class="sr-only">Lead Auditor judgment</label>
+          <textarea class="game-textarea" id="lead-judgment" placeholder="State your judgment about the official record's claims. Reference specific language from the documents."></textarea>
+          <button class="btn btn-primary mt1" onclick="submitLeadJudgment()">Record judgment</button>
+          <div class="feedback-msg" id="fb-r1" role="alert"></div>
+        </div>
+
+        <div data-roles="analyst,keeper" class="mt4">
+          <p class="section-head">Limitation Claim</p>
+          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;">
+            Articulate what this archive cannot tell you — and why that absence matters.
+            <span data-tip="misalignment" style="border-bottom:1px dashed var(--gold);cursor:help;" title="">What are the misalignments</span> between the record's claims and its evidence?
+          </p>
+          <label for="limitation-claim" class="sr-only">Limitation claim</label>
+          <textarea class="game-textarea" id="limitation-claim" placeholder="What can't be known from this record alone? What would a fuller archive need to include?"></textarea>
+          <button class="btn btn-primary mt1" onclick="buildLimitationClaimScaffold()">Build limitation claim</button>
+          <div class="feedback-msg" id="fb-r1-lim" role="alert"></div>
+        </div>
+
+        <div data-roles="signal" class="mt4">
+          <p class="section-head">Signal Analysis</p>
+          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;">What signals in this official record are meant to generate trust — and are those signals 
+            <span data-tip="earned" style="border-bottom:1px dashed var(--gold);cursor:help;" title="">earned</span>?
+          </p>
+          <label for="signal-r1" class="sr-only">Signal analysis for Room I</label>
+          <textarea class="game-textarea" id="signal-r1" placeholder="What does the official framing use to claim authority? Is that authority earned?"></textarea>
+          <button class="btn btn-primary mt1" onclick="submitSignalR1()">Record signal analysis</button>
+          <div class="feedback-msg" id="fb-r1-sig" role="alert"></div>
+        </div>
+
+        <div class="frustration-banner" id="frust-banner-1" role="alert">
+          <p><strong>Frustration recognized.</strong> This room is designed to be genuinely difficult — the evidence is incomplete by design. <a href="#" onclick="recoverFrustrationDocument(1);return false;" style="color:var(--gold2);">↩ Read a recovery note</a></p>
+        </div>
+        <div style="display:none;" id="frust-recog-1" class="feedback-msg visible feedback-info" role="alert"></div>
+        <div class="feedback-msg" id="fb-r1-frust" role="alert"></div>
+
+        <div id="r1-proceed" hidden class="mt4" role="status">
+          <button class="btn btn-gold" onclick="goToRoom(2)">Proceed to Room II →</button>
+        </div>
+      </div><!-- /room-1 -->
+
+      <!-- ══ ROOM II — BROADCAST SATURATION ══ -->
+      <div class="room-panel" id="room-2">
+        <div class="task-box">
+          <p class="task-label">Room II — Broadcast Saturation</p>
+          <p class="task-text">You now have access to an abundance of sources. Classify each one: is its claim 
+            <span data-tip="earned" style="border-bottom:1px dashed var(--gold);cursor:help;" title="">earned</span> or 
+            <span data-tip="unearned" style="border-bottom:1px dashed var(--gold);cursor:help;" title="">unearned</span>?
+            Then identify what the saturation obscures.</p>
+        </div>
+
+        <div style="display:flex;gap:0.8rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+          <p style="color:var(--text-dim);font-size:0.82rem;font-family:var(--font-mono);">
+            Sources classified: <span class="count-pill"><span id="r2-tagged-count">0</span> / 5</span>
+          </p>
+          <p style="color:var(--text-dim);font-size:0.76rem;">(Rate at least 5 to unlock the analysis section)</p>
+        </div>
+
+        <div class="signal-feed" role="list">
+
+          <div class="signal-item" role="listitem">
+            <div class="signal-rank" aria-hidden="true">1</div>
+            <div class="signal-body">
+              <p class="signal-headline">Associated Press Wire — "Relocation Proceeds Smoothly, Officials Say"</p>
+              <p class="signal-meta"><span>March 24, 1943</span><span>Reprinted in 47 regional newspapers</span><span class="voice-tag voice-press">Press</span></p>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">WRA officials report transfers proceeding ahead of schedule. Source: WRA press release. Housing described as "adequate for the circumstances."</p>
+            </div>
+            <div class="signal-controls" role="group" aria-label="Classify AP wire report">
+              <button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="tagSource(this,'ap-wire','earned')">Earned</button>
+              <button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="tagSource(this,'ap-wire','unearned')">Unearned</button>
+            </div>
+          </div>
+
+          <div class="signal-item" role="listitem">
+            <div class="signal-rank" aria-hidden="true">2</div>
+            <div class="signal-body">
+              <p class="signal-headline">Photograph — "Departure Platform, Union Station"</p>
+              <p class="signal-meta"><span>April 1943</span><span>WRA official photographer</span><span class="voice-tag voice-official">Official</span></p>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">[Image: Families with luggage at train platform. WRA caption: "Evacuees depart voluntarily for new homes in the interior."] Photograph taken and captioned by WRA. No independent press present.</p>
+            </div>
+            <div class="signal-controls" role="group" aria-label="Classify WRA photograph">
+              <button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="tagSource(this,'wra-photo','earned')">Earned</button>
+              <button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="tagSource(this,'wra-photo','unearned')">Unearned</button>
+            </div>
+          </div>
+
+          <div class="signal-item" role="listitem">
+            <div class="signal-rank" aria-hidden="true">3</div>
+            <div class="signal-body">
+              <p class="signal-headline">Radio Broadcast — "America's Home Front" (NBC Blue Network)</p>
+              <p class="signal-meta"><span>March 1943</span><span>NBC Blue Network</span><span class="voice-tag voice-press">Press</span></p>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">"Full cooperation… many expressed gratitude." Source stated on-air: WRA press release read verbatim.</p>
+            </div>
+            <div class="signal-controls" role="group" aria-label="Classify radio broadcast">
+              <button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="tagSource(this,'radio','earned')">Earned</button>
+              <button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="tagSource(this,'radio','unearned')">Unearned</button>
+            </div>
+          </div>
+
+          <div class="signal-item" role="listitem">
+            <div class="signal-rank" aria-hidden="true">4</div>
+            <div class="signal-body">
+              <p class="signal-headline">Community Letter — Intercepted by WRA Censor</p>
+              <p class="signal-meta"><span>April 1943</span><span>Personal correspondence · never delivered · declassified 1992</span><span class="voice-tag voice-testimony">Testimony</span></p>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">"The barracks are not what they told us. There is one stove for forty people. The children are sick. We have been told we cannot leave. I am writing because I do not know if anyone will read this — they have told us our letters are being read."</p>
+            </div>
+            <div class="signal-controls" role="group" aria-label="Classify intercepted letter">
+              <button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="tagSource(this,'letter','earned')">Earned</button>
+              <button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="tagSource(this,'letter','unearned')">Unearned</button>
+            </div>
+          </div>
+
+          <div class="signal-item" role="listitem">
+            <div class="signal-rank" aria-hidden="true">5</div>
+            <div class="signal-body">
+              <p class="signal-headline">Internal WRA Survey — "Evacuee Satisfaction Assessment"</p>
+              <p class="signal-meta"><span>May 1943</span><span>Internal · not published</span><span class="voice-tag voice-official">Official</span></p>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Conducted by WRA staff. Respondents who answered negatively were flagged as "disloyal elements." No response option for coercive conditions. Results cited publicly as evidence of program success.</p>
+            </div>
+            <div class="signal-controls" role="group" aria-label="Classify WRA satisfaction survey">
+              <button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="tagSource(this,'wra-survey','earned')">Earned</button>
+              <button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="tagSource(this,'wra-survey','unearned')">Unearned</button>
+            </div>
+          </div>
+
+        </div><!-- /signal-feed -->
+
+        <div id="r2-limitation-zone" hidden class="mt4">
+          <p class="section-head">Saturation Analysis</p>
+          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;line-height:1.65;">What cannot be sustained — what claim fails — even in this saturated environment? What does the volume of official sources obscure rather than reveal?</p>
+          <label for="r2-limitation" class="sr-only">Saturation analysis response</label>
+          <textarea class="game-textarea" id="r2-limitation" placeholder="Even with all these sources, what remains unknowable? What does the saturation hide?"></textarea>
+          <button class="btn btn-primary mt1" onclick="submitLimitation()">Submit saturation analysis</button>
+          <div class="feedback-msg" id="fb-r2" role="alert"></div>
+        </div>
+
+        <div class="frustration-banner" id="frust-banner-2" role="alert">
+          <p><strong>Frustration recognized.</strong> There are no clearly "right" answers — the difficulty is the evidence. <a href="#" onclick="recoverFrustrationDocument(2);return false;" style="color:var(--gold2);">↩ Recovery note</a></p>
+        </div>
+        <div style="display:none;" id="frust-recog-2" class="feedback-msg visible feedback-info" role="alert"></div>
+        <div class="feedback-msg" id="fb-r2-frust" role="alert"></div>
+
+        <div id="r2-proceed" hidden class="mt4" role="status">
+          <button class="btn btn-gold" onclick="goToRoom(3)">Proceed to Room III →</button>
+        </div>
+      </div><!-- /room-2 -->
+
+      <!-- ══ ROOM III — ECHO CORROBORATION ══ -->
+      <div class="room-panel" id="room-3">
+        <div class="task-box">
+          <p class="task-label">Room III — Echo Corroboration</p>
+          <p class="task-text">A widely repeated claim moves through a network of citations. Trace it to its origin. Determine whether repetition across media constitutes independent corroboration — or mere echoing of a single source.</p>
+        </div>
+
+        <p class="section-head">Citation Network — Claim under investigation</p>
+        <div class="document-frame">
+          <div class="doc-title">The claim: "Evacuees cooperated fully and expressed satisfaction with relocation arrangements."</div>
+          <div class="doc-body" style="margin-top:0.8rem;">
+            <p style="margin-bottom:0.5rem;">This claim appears in the following sources in chronological order:</p>
+            <ol style="padding-left:1.4rem;color:var(--ink2);font-size:0.88rem;line-height:1.85;">
+              <li><strong>1943:</strong> WRA press release (original source)</li>
+              <li><strong>1943:</strong> AP wire report (cites "WRA officials")</li>
+              <li><strong>1943:</strong> 47 regional newspapers (reprint AP wire verbatim)</li>
+              <li><strong>1944:</strong> Congressional testimony (cites "press reports")</li>
+              <li><strong>1947:</strong> Government history of the WRA (cites Congressional testimony)</li>
+              <li><strong>1952:</strong> High school textbook (cites 1947 government history)</li>
+              <li><strong>1975:</strong> Encyclopedia entry (cites 1952 textbook)</li>
+              <li><strong>1989:</strong> Academic article notes "longstanding historical consensus"</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="mt3">
+          <p class="section-head">Citation Trace</p>
+          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;line-height:1.65;">How many truly independent sources are in this chain? Trace the claim back to its origin and explain how it achieved the appearance of consensus.</p>
+          <label for="r3-trace" class="sr-only">Citation trace response</label>
+          <textarea class="game-textarea" id="r3-trace" placeholder="How many independent sources are there? What does the citation chain reveal about how this claim became 'consensus'?"></textarea>
+          <button class="btn btn-primary mt1" onclick="submitEchoTrace()">Submit citation trace</button>
+          <div class="feedback-msg" id="fb-r3" role="alert"></div>
+        </div>
+
+        <div id="r3-judgment-zone" hidden class="mt3">
+          <p class="section-head">Corroboration Verdict</p>
+          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;">Is this claim independently corroborated — or is this echo corroboration: repetition of a single source across many outlets?</p>
+          <div style="display:flex;gap:0.8rem;flex-wrap:wrap;" role="group" aria-label="Corroboration verdict options">
+            <button class="btn btn-primary" onclick="submitLeadJudgmentR3('echo corroboration')">Echo corroboration</button>
+            <button class="btn btn-ghost" onclick="submitLeadJudgmentR3('independently corroborated')">Independently corroborated</button>
+            <button class="btn btn-ghost" onclick="submitLeadJudgmentR3('insufficient evidence to determine')">Insufficient evidence</button>
+          </div>
+          <div class="feedback-msg" id="fb-r3-j" role="alert"></div>
+        </div>
+
+        <div class="frustration-banner" id="frust-banner-3" role="alert">
+          <p><strong>Frustration recognized.</strong> Echo corroboration is designed to look like consensus. <a href="#" onclick="recoverFrustrationDocument(3);return false;" style="color:var(--gold2);">↩ Recovery note</a></p>
+        </div>
+        <div style="display:none;" id="frust-recog-3" class="feedback-msg visible feedback-info" role="alert"></div>
+        <div class="feedback-msg" id="fb-r3-frust" role="alert"></div>
+
+        <div id="r3-proceed" hidden class="mt4" role="status">
+          <button class="btn btn-gold" onclick="goToRoom(4)">Proceed to Room IV →</button>
+        </div>
+      </div><!-- /room-3 -->
+
+      <!-- ══ ROOM IV — FEED OVERLOAD ══ -->
+      <div class="room-panel" id="room-4">
+        <div class="task-box">
+          <p class="task-label">Room IV — Feed Overload</p>
+          <p class="task-text">You're inside an algorithmically-ranked feed. Rate each signal: is its trust indicator
+            <span data-tip="earned" style="border-bottom:1px dashed var(--gold);cursor:help;" title="">earned</span> or
+            <span data-tip="unearned" style="border-bottom:1px dashed var(--gold);cursor:help;" title="">unearned</span>?
+            Rate all 6 to unlock the reflection.</p>
+        </div>
+
+        <div style="display:flex;gap:0.8rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+          <p style="color:var(--text-dim);font-size:0.82rem;font-family:var(--font-mono);">
+            Signals rated: <span class="count-pill"><span id="r4-rated-count">0</span> / 6</span>
+          </p>
+        </div>
+
+        <div class="signal-feed" role="list">
+
+          <div class="signal-item" role="listitem">
+            <div class="signal-rank" aria-hidden="true">1</div>
+            <div class="signal-body">
+              <p class="signal-headline">📌 TRENDING: "WRA Archives Finally Tell the Full Story" — HistoryNow.com</p>
+              <p class="signal-meta"><span>47,200 shares</span><span>Verified ✓</span><span>Sponsored content</span><span class="voice-tag voice-algorithmic">Algorithmic</span></p>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Summarizes WRA's own archive release. No independent historical analysis. Verified badge belongs to the platform domain, not content accuracy.</p>
+            </div>
+            <div class="signal-controls" role="group" aria-label="Rate HistoryNow article">
+              <button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-1','earned')">Earned</button>
+              <button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-1','unearned')">Unearned</button>
+            </div>
+          </div>
+
+          <div class="signal-item" role="listitem">
+            <div class="signal-rank" aria-hidden="true">2</div>
+            <div class="signal-body">
+              <p class="signal-headline">Peer-reviewed article: "Censorship and the WRA Oral History Archive, 1942–1946"</p>
+              <p class="signal-meta"><span>212 shares</span><span>Journal of American History · 2018</span><span class="voice-tag voice-official">Academic</span></p>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Peer-reviewed. Based on declassified censor files. Argues official oral history collection systematically excluded critical testimonies. Low engagement — ranked below sponsored content by algorithm.</p>
+            </div>
+            <div class="signal-controls" role="group" aria-label="Rate Journal of American History article">
+              <button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-2','earned')">Earned</button>
+              <button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-2','unearned')">Unearned</button>
+            </div>
+          </div>
+
+          <div class="signal-item" role="listitem">
+            <div class="signal-rank" aria-hidden="true">3</div>
+            <div class="signal-body">
+              <p class="signal-headline">❤️ 89K likes — "My grandfather's story of the camps — a thread 🧵"</p>
+              <p class="signal-meta"><span>89,400 likes · 31K retweets</span><span>Personal account</span><span class="voice-tag voice-testimony">First-person</span></p>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Personal family history. High engagement due to emotional resonance. Factual claims consistent with declassified evidence. Not peer-reviewed, but primary testimony type.</p>
+            </div>
+            <div class="signal-controls" role="group" aria-label="Rate grandfather's thread">
+              <button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-3','earned')">Earned</button>
+              <button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-3','unearned')">Unearned</button>
+            </div>
+          </div>
+
+          <div class="signal-item" role="listitem">
+            <div class="signal-rank" aria-hidden="true">4</div>
+            <div class="signal-body">
+              <p class="signal-headline">Wikipedia: "Japanese American Internment" — Featured Article</p>
+              <p class="signal-meta"><span>Featured Article status</span><span>15,000+ edits</span><span class="voice-tag voice-algorithmic">Aggregated</span></p>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Cites 200+ sources. Featured status indicates extensive review. Cannot be fully read in a feed scroll — algorithm surfaces it as authoritative without users engaging with the sourcing.</p>
+            </div>
+            <div class="signal-controls" role="group" aria-label="Rate Wikipedia article">
+              <button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-4','earned')">Earned</button>
+              <button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-4','unearned')">Unearned</button>
+            </div>
+          </div>
+
+          <div class="signal-item" role="listitem">
+            <div class="signal-rank" aria-hidden="true">5</div>
+            <div class="signal-body">
+              <p class="signal-headline">⚠️ FLAGGED AS DISPUTED: "The internment was necessary for national security"</p>
+              <p class="signal-meta"><span>Platform dispute flag</span><span>Conservative history blog</span><span class="voice-tag voice-algorithmic">Flagged</span></p>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Flagged by platform content moderation. The flag signals dispute but doesn't say what the dispute is about or who flagged it. Is the flag itself an earned signal?</p>
+            </div>
+            <div class="signal-controls" role="group" aria-label="Rate flagged blog post">
+              <button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-5','earned')">Earned</button>
+              <button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-5','unearned')">Unearned</button>
+            </div>
+          </div>
+
+          <div class="signal-item" role="listitem">
+            <div class="signal-rank" aria-hidden="true">6</div>
+            <div class="signal-body">
+              <p class="signal-headline">Densho Digital Archive: Primary source collection</p>
+              <p class="signal-meta"><span>Not trending</span><span>Community-built archive</span><span class="voice-tag voice-testimony">Community</span></p>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">The largest archive of Japanese American incarceration records, built by and for the community. Generates no engagement signals. Ranked last. The algorithm de-prioritizes what it cannot measure.</p>
+            </div>
+            <div class="signal-controls" role="group" aria-label="Rate Densho Digital Archive">
+              <button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-6','earned')">Earned</button>
+              <button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-6','unearned')">Unearned</button>
+            </div>
+          </div>
+
+        </div><!-- /signal-feed -->
+
+        <div id="r4-reflect-zone" hidden class="mt4">
+          <p class="section-head">Feed Reflection</p>
+          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;line-height:1.65;">How did ranking, engagement counts, and platform signals shape what felt credible? Which signals were designed to feel like trust — and was that feeling earned?</p>
+          <label for="r4-reflect" class="sr-only">Feed reflection response</label>
+          <textarea class="game-textarea" id="r4-reflect" placeholder="Reflect on how the feed's architecture shaped your judgment. At least two sentences."></textarea>
+          <button class="btn btn-primary mt1" onclick="submitFeedReflection()">Submit reflection</button>
+          <div class="feedback-msg" id="fb-r4" role="alert"></div>
+        </div>
+
+        <div class="frustration-banner" id="frust-banner-4" role="alert">
+          <p><strong>Frustration recognized.</strong> The feed is designed to be overwhelming. <a href="#" onclick="recoverFrustrationDocument(4);return false;" style="color:var(--gold2);">↩ Recovery note</a></p>
+        </div>
+        <div style="display:none;" id="frust-recog-4" class="feedback-msg visible feedback-info" role="alert"></div>
+        <div class="feedback-msg" id="fb-r4-frust" role="alert"></div>
+
+        <div id="r4-proceed" hidden class="mt4" role="status">
+          <button class="btn btn-gold" onclick="goToRoom(5)">Proceed to Room V →</button>
+        </div>
+      </div><!-- /room-4 -->
+
+      <!-- ══ ROOM V — SMOOTH SYNTHETIC COHERENCE ══ -->
+      <div class="room-panel" id="room-5">
+        <div class="task-box">
+          <p class="task-label">Room V — Smooth Synthetic Coherence</p>
+          <p class="task-text">The final room: an AI-generated summary presented as authoritative, comprehensive, and definitive. Complete the seven-part Escape Protocol — a disciplined critical account of what the AI made disappear.</p>
+        </div>
+
+        <div class="document-frame" style="border-left-color:var(--sepia);background:#1a1610;">
+          <div class="doc-meta" style="color:var(--sepia2);">
+            <span class="voice-tag voice-algorithmic">AI-Generated</span>
+            <span>Archive Summary · Auto-generated · Version 3.1</span>
+          </div>
+          <div class="doc-title" style="color:var(--gold2);">Comprehensive Archive Summary: 1943 Relocation Program</div>
+          <div class="doc-body" style="margin-top:0.8rem;color:rgba(245,240,232,0.7);">
+            <p>The 1943 administrative relocation program was carried out in accordance with federal directives and proceeded without significant disruption. Available records indicate that transferred individuals received housing and employment support at receiving facilities. Contemporary press coverage documented broad community cooperation with the relocation process.</p>
+            <p style="margin-top:0.7rem;">Oral history sources suggest mixed experiences, though the majority of testimonies collected through official programs reflect adaptation and community resilience. Property arrangements varied by individual circumstance. Administrative documentation from this period is partially incomplete due to wartime conditions.</p>
+            <p style="margin-top:0.7rem;">This summary draws on 847 archival items and represents a balanced synthesis of available evidence. Gaps in the record are noted where identified.</p>
+          </div>
+        </div>
+
+        <p class="section-head mt4">The Seven-Part Escape Protocol</p>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem;">
+          Complete all seven fields (at least 10 characters each).
+          Progress: <strong id="escape-progress" style="color:var(--gold2);" aria-live="polite">0 / 7</strong>
+        </p>
+
+        <div class="escape-grid">
+          <div class="escape-field">
+            <p class="escape-field-label">1. Historical Claim</p>
+            <p class="escape-field-hint">What claim does the AI summary make about what happened? State it precisely.</p>
+            <label for="historical-claim" class="sr-only">Historical claim field</label>
+            <textarea class="game-textarea" id="historical-claim" oninput="checkEscapeProgress()" placeholder="The AI claims that…"></textarea>
+          </div>
+          <div class="escape-field">
+            <p class="escape-field-label">2. Curation Claim</p>
+            <p class="escape-field-hint">What does the summary claim about its own sources and coverage?</p>
+            <label for="curation-claim" class="sr-only">Curation claim field</label>
+            <textarea class="game-textarea" id="curation-claim" oninput="checkEscapeProgress()" placeholder="The summary claims its sources are…"></textarea>
+          </div>
+          <div class="escape-field">
+            <p class="escape-field-label">3. Limitation Claim</p>
+            <p class="escape-field-hint">What limitations does the summary acknowledge — and what does it fail to name?</p>
+            <label for="limitation-claim-v" class="sr-only">Limitation claim field</label>
+            <textarea class="game-textarea" id="limitation-claim-v" oninput="checkEscapeProgress()" placeholder="It acknowledges X but fails to name…"></textarea>
+          </div>
+          <div class="escape-field">
+            <p class="escape-field-label">4. Saturation Note</p>
+            <p class="escape-field-hint">How does the summary use volume ("847 archival items") as a trust signal?</p>
+            <label for="saturation-note" class="sr-only">Saturation note field</label>
+            <textarea class="game-textarea" id="saturation-note" oninput="checkEscapeProgress()" placeholder="The summary uses quantity to suggest…"></textarea>
+          </div>
+          <div class="escape-field">
+            <p class="escape-field-label">5. Handoff Decision</p>
+            <p class="escape-field-hint">Would you include this summary in the public archive — yes, no, or with conditions? Justify.</p>
+            <label for="handoff-decision" class="sr-only">Handoff decision field</label>
+            <textarea class="game-textarea" id="handoff-decision" oninput="checkEscapeProgress()" placeholder="My decision: [yes/no/conditional] because…"></textarea>
+          </div>
+          <div class="escape-field">
+            <p class="escape-field-label">6. Remnant Statement</p>
+            <p class="escape-field-hint">What did the AI make disappear? Name specific evidence rendered invisible.</p>
+            <label for="remnant-statement" class="sr-only">Remnant statement field</label>
+            <textarea class="game-textarea" id="remnant-statement" oninput="checkEscapeProgress()" placeholder="The AI erased or minimized…"></textarea>
+          </div>
+          <div class="escape-field" style="border-color:var(--gold2);">
+            <p class="escape-field-label" style="color:var(--gold2);">7. Your Exhibit Description</p>
+            <p class="escape-field-hint">Write a paragraph you'd stand behind — honest about gaps, specific about what's known, clear about what the archive cannot tell us.</p>
+            <label for="exhibit-description" class="sr-only">Exhibit description field</label>
+            <textarea class="game-textarea" id="exhibit-description" style="min-height:140px;" oninput="checkEscapeProgress()" placeholder="In your own words: what happened, what we know, and what we can't know…"></textarea>
+          </div>
+        </div>
+
+        <button class="btn btn-gold mt3" id="escape-submit-btn" hidden onclick="submitEscapeProtocol()">🔓 Submit Escape Protocol</button>
+        <div class="feedback-msg" id="fb-r5" role="alert"></div>
+
+        <div id="escape-complete" hidden class="mt4" role="status" aria-live="polite">
+          <div style="background:var(--bg-panel);border:1px solid var(--gold2);padding:2rem;text-align:center;">
+            <p style="font-family:var(--font-mono);font-size:0.66rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold2);margin-bottom:0.8rem;">Archive Escape Complete</p>
+            <p style="font-family:var(--font-serif);font-size:1.6rem;color:var(--paper);margin-bottom:1rem;">You've escaped the record.</p>
+            <p style="color:var(--text-dim);font-size:0.9rem;max-width:500px;margin:0 auto 1.4rem;line-height:1.75;">The archive is still incomplete. It always will be. But now you know how to read the frame — not just what's inside it.</p>
+            <div style="background:var(--bg-card);border:1px solid var(--border-dim);padding:1.2rem;margin-top:1rem;text-align:left;">
+              <p style="font-family:var(--font-mono);font-size:0.64rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--sepia2);margin-bottom:0.5rem;">Your exhibit description</p>
+              <p id="final-exhibit-text" style="font-style:italic;color:var(--paper2);font-size:0.9rem;line-height:1.75;"></p>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.8rem;margin-top:1.2rem;flex-wrap:wrap;">
+            <a href="contribute.html" class="btn btn-teal">Contribute a source to the archive</a>
+            <a href="about.html" class="btn btn-ghost">Learn about the project</a>
+          </div>
+        </div>
+      </div><!-- /room-5 -->
+
+    </div><!-- /room-wrap -->
+  </div><!-- /game-area -->
+
+</div><!-- /game-shell -->
+
+<div class="ledger-toast" id="ledger-toast" role="status" aria-live="polite"></div>
+
+<!-- Screen-reader-only utility class -->
+<style>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;}</style>
+
+<script>
+// Signal Monitor Room I — fallback submit (not in role-card list)
+function submitSignalR1() {
+  const v = document.getElementById('signal-r1')?.value.trim();
+  if (!v || v.length < 15) {
+    showFeedback('fb-r1-sig','warn','Articulate your signal analysis in at least one full sentence.');
+    document.getElementById('signal-r1')?.focus();
+    return;
+  }
+  S.r1.claimSubmitted = true;
+  showFeedback('fb-r1-sig','ok','✓ Signal analysis recorded. You may proceed to Room II.');
+  const proceed = document.getElementById('r1-proceed');
+  if (proceed) { proceed.removeAttribute('hidden'); setTimeout(()=>proceed.scrollIntoView({behavior:'smooth',block:'nearest'}),200); }
+  setStickyProceed('Proceed to Room II →', () => goToRoom(2));
+  logEvent('signal_r1', { length: v.length });
+}
+
+// Add body class when sticky button is shown
+const _origSetSticky = window.setStickyProceed;
+window.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('sticky-proceed');
+  if (!btn) return;
+  const obs = new MutationObserver(() => {
+    document.body.classList.toggle('has-sticky', btn.style.display !== 'none');
+  });
+  obs.observe(btn, { attributes: true, attributeFilter: ['style'] });
+});
+</script>
+<script src="memory.js"></script>
+</body>
+</html>
