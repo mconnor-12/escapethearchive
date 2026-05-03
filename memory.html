@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escape the Archive: Drowning in the Record</title>
+<link rel="stylesheet" href="memory.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── NO NESTED SCROLL CONTAINERS ── */
+html, body { height: auto; overflow-x: hidden; }
+#game-shell, #game-area { overflow: visible; }
+
+/* ── LANDING / ENTER THE ARCHIVE ── */
+#landing {
+  min-height: 100vh;
+  background: var(--bg-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+#landing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg,  transparent, transparent 59px, rgba(184,150,42,.04) 59px, rgba(184,150,42,.04) 60px),
+    repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(184,150,42,.03) 59px, rgba(184,150,42,.03) 60px);
+  pointer-events: none;
+}
+.landing-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold2);
+  margin-bottom: 1.4rem;
+  position: relative;
+}
+.landing-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  color: var(--paper);
+  line-height: 1.1;
+  position: relative;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+.landing-subtitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  color: var(--gold2);
+  position: relative;
+  margin-bottom: 2rem;
+}
+.landing-premise {
+  max-width: 580px;
+  margin: 0 auto 2.8rem;
+  font-size: 0.96rem;
+  color: var(--text-dim);
+  line-height: 1.8;
+  position: relative;
+}
+.landing-premise strong { color: var(--paper2); }
+
+.landing-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+.btn-enter {
+  background: var(--rust2);
+  color: white;
+  border: none;
+  padding: 1rem 3rem;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-enter:hover { background: #a03e1e; transform: translateY(-1px); }
+.btn-enter:active { transform: scale(0.98); }
+
+.landing-links {
+  display: flex;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.landing-link {
+  background: transparent;
+  border: 1px solid var(--border-dim);
+  color: var(--paper2);
+  padding: 0.6rem 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.landing-link:hover { border-color: var(--gold); color: var(--gold2); }
+
+.landing-scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.25);
+  animation: fadeInOut 3s ease infinite;
+}
+@keyframes fadeInOut { 0%,100%{opacity:0.3;} 50%{opacity:0.8;} }
+
+/* ── OVERLAY PANELS (About the Project / About Me) ── */
+.overlay-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  overflow-y: auto;
+  background: var(--bg-dark);
+}
+.overlay-panel.open { display: block; }
+.overlay-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 3rem 2rem 5rem;
+  position: relative;
+}
+.overlay-close {
+  position: fixed;
+  top: 1.2rem;
+  right: 1.5rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  color: var(--paper2);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  z-index: 900;
+  transition: border-color 0.2s, color 0.2s;
+}
+.overlay-close:hover { border-color: var(--gold); color: var(--gold2); }
+
+.ov-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold2);
+  margin-bottom: 0.8rem;
+}
+.ov-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  color: var(--paper);
+  line-height: 1.2;
+  margin-bottom: 2rem;
+}
+.ov-title em { font-style: italic; color: var(--gold2); }
+
+.ov-body p {
+  font-size: 0.96rem;
+  line-height: 1.85;
+  color: rgba(245,240,232,0.75);
+  margin-bottom: 1.2rem;
+  max-width: 680px;
+}
+.ov-body strong { color: var(--paper2); font-weight: 600; }
+
+.ov-section-head {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sepia2);
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 0.5rem;
+  margin: 2.5rem 0 1rem;
+}
+
+.ov-pull {
+  border-left: 3px solid var(--rust);
+  padding: 1.2rem 1.5rem;
+  background: rgba(255,255,255,0.03);
+  margin: 2rem 0;
+}
+.ov-pull p {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--paper2);
+  margin-bottom: 0.4rem;
+}
+.ov-pull cite {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sepia2);
+  font-style: normal;
+}
+
+/* Photo grid inside overlay */
+.ov-photo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin: 2rem 0;
+}
+.ov-photo-grid figure { margin: 0; overflow: hidden; }
+.ov-photo-grid figure img {
+  width: 100%; height: 220px;
+  object-fit: cover;
+  display: block;
+  filter: sepia(0.1) contrast(1.04);
+  transition: transform 0.4s;
+}
+.ov-photo-grid figure:first-child { grid-row: span 2; }
+.ov-photo-grid figure:first-child img { height: 100%; }
+.ov-photo-grid figure:hover img { transform: scale(1.03); }
+@media (max-width: 580px) { .ov-photo-grid { grid-template-columns: 1fr; } .ov-photo-grid figure:first-child { grid-row: span 1; } }
+
+.ov-photo-grid figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  padding: 0.4rem 0;
+}
+
+/* Theory cards */
+.ov-theory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.ov-theory-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-top: 2px solid var(--gold2);
+  padding: 1.2rem;
+}
+.ov-theory-card .scholar {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.88rem;
+  color: var(--gold2);
+  margin-bottom: 0.4rem;
+}
+.ov-theory-card p {
+  font-size: 0.82rem;
+  color: rgba(245,240,232,0.65);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Contact form inside overlay */
+.ov-form-group { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+.ov-form-group label { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sepia2); }
+.ov-form-group input, .ov-form-group select, .ov-form-group textarea {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-dim);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  padding: 0.7rem 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  border-radius: 0;
+  width: 100%;
+}
+.ov-form-group input:focus, .ov-form-group select:focus, .ov-form-group textarea:focus { border-color: var(--gold); }
+.ov-form-group textarea { min-height: 100px; resize: vertical; }
+.ov-form-group select { background: var(--bg-card); cursor: pointer; -webkit-appearance: none; }
+.ov-form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 540px) { .ov-form-2col { grid-template-columns: 1fr; } }
+
+/* ── GAME STICKY PROCEED ── */
+#sticky-proceed {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--teal);
+  color: white;
+  padding: 1rem 2rem;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  z-index: 400;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 3px solid var(--gold2);
+  transition: background 0.2s;
+}
+#sticky-proceed:hover { background: var(--teal2); }
+body.has-sticky { padding-bottom: 60px; }
+
+/* ── GAME-SPECIFIC ── */
+.dnd-chip.kb-selected { border-color: var(--gold2); color: var(--gold2); box-shadow: 0 0 0 2px var(--gold2); outline: 2px solid var(--gold2); }
+.hotspot-btn.visited { color: var(--gold2); border-color: var(--gold); background: rgba(212,173,58,0.08); }
+.role-orientation { background: rgba(42,95,92,0.18); border-left: 3px solid var(--teal2); padding: 1rem 1.3rem; margin-bottom: 1.6rem; }
+.role-orientation .ro-label { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--teal2); margin-bottom: 0.4rem; }
+.role-orientation .ro-text { font-size: 0.9rem; color: var(--paper2); line-height: 1.7; }
+#progress-label { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em; color: var(--text-dim); }
+.storage-notice { background: rgba(107,82,48,0.25); border: 1px solid var(--border-dim); border-left: 3px solid var(--sepia2); padding: 0.7rem 1rem; font-size: 0.72rem; color: var(--sepia2); font-family: var(--font-mono); margin-top: 0.6rem; line-height: 1.6; }
+.sig-btn[aria-pressed="true"].earned { border-color: var(--green-ok); color: #8ecf9e; background: rgba(58,122,74,0.15); }
+.sig-btn[aria-pressed="true"].unearned { border-color: var(--red-alert); color: #e89090; background: rgba(139,42,42,0.15); }
+#hotspot-zone { scroll-margin-top: 80px; }
+#prologue-proceed { scroll-margin-top: 80px; }
+.count-pill { display: inline-block; background: var(--border-dim); color: var(--gold2); font-family: var(--font-mono); font-size: 0.72rem; padding: 0.15rem 0.6rem; border-radius: 20px; font-weight: 700; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     LANDING - ENTER THE ARCHIVE
+════════════════════════════════════════════════ -->
+<div id="landing">
+  <p class="landing-eyebrow">An archival escape room for AP U.S. History</p>
+  <h1 class="landing-title">Escape the Archive</h1>
+  <p class="landing-subtitle">Drowning in the Record</p>
+  <p class="landing-premise">
+    Out along a farm road, a grain silo towers with the confidence of a culture that believes it has solved the problem of keeping. Inside its metal embrace, grain takes on its own physics. It settles, shifts, crusts over, hollows beneath itself. When the surface hardens into the illusion of ground, a body can step forward believing it has found footing only to be taken under by the very abundance meant to sustain life.
+    <br><br>
+    <strong>The archive works the same way.</strong> This is a game about learning to read the surface before you step.
+  </p>
+  <div class="landing-actions">
+    <button class="btn-enter" onclick="beginGame()">Enter the Archive</button>
+    <div class="landing-links">
+      <button class="landing-link" onclick="openPanel('panel-project')" aria-label="About this project">About the Project</button>
+      <button class="landing-link" onclick="openPanel('panel-creator')" aria-label="About Marie Connor">About Me</button>
+      <a href="contribute.html" class="landing-link" style="text-decoration:none;">Contribute a Source</a>
+    </div>
+  </div>
+  <p class="landing-scroll-hint">Select a role to begin</p>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     OVERLAY - ABOUT THE PROJECT
+════════════════════════════════════════════════ -->
+<div class="overlay-panel" id="panel-project" role="dialog" aria-label="About the Project" aria-modal="true">
+  <button class="overlay-close" onclick="closePanel('panel-project')">✕ Close</button>
+  <div class="overlay-inner">
+    <p class="ov-eyebrow">About the Project</p>
+    <h2 class="ov-title">What does it mean to read the <em>system</em>, not just the source?</h2>
+
+    <div class="ov-body">
+      <p>
+        I keep returning to the grain silo. Not because silos are interesting in themselves, but because of what they do to the problem of keeping. Storage looks like protection. Abundance looks like completeness. And then the surface hardens, and the footing disappears, and the body that stepped forward believing it had found ground gets taken under by the very accumulation meant to sustain it.
+      </p>
+      <p>
+        That is what the contemporary archive does to students. It arrives not only as silence or omission, which we have spent decades learning to name, but as managed saturation. A searchable, ranked, duplicated, captioned, and synthetically coherent field of traces that feels complete precisely when it is most dangerous to an unsuspecting step. What threatens students now is not only that some histories never enter the record. It is that the record arrives in their classroom as already arranged abundance, and the work of arranging it has been done before they ever open the packet.
+      </p>
+
+      <div class="ov-pull">
+        <p>The pedagogical problem is not simply that students analyze biased sources. It is that they are rarely taught to analyze biased source systems.</p>
+        <cite>Marie Connor, Escape the Archive: Drowning in the Record (2026)</cite>
+      </div>
+
+      <p>
+        This escape room is my attempt to make that prior layer of work visible and palpable. Students do not merely read about how archives organize memory. They move through differently organized surfaces of judgment, each one quietly recalibrating what feels trustworthy, what feels complete, and what feels worth carrying forward. The rooms sequence from curated scarcity into managed abundance because that is how the informational conditions of the present actually work. Official calm first, then saturation, then echo, then the smooth algorithmic surface that makes it hardest to feel anything has gone wrong at all.
+      </p>
+      <p>
+        What waits at the end is not mastery. It is an answerable limitation. Students are asked to name what can responsibly be said given the evidence available, the absences that remain, and the contradictions that have not resolved. They do not leave the archive clean. They learn to enter it differently.
+      </p>
+
+      <p class="ov-section-head">The Theoretical Grounding</p>
+      <p>
+        This project draws on a set of theoretical commitments built across a year of doctoral study at Teachers College, Columbia University, inside Professor Dani Friedrich's seminar on Memory, History, and Curriculum. The framework holds several tensions at once, and the game is designed to hold them too.
+      </p>
+
+      <div class="ov-theory-grid">
+        <div class="ov-theory-card">
+          <p class="scholar">Nora (1989)</p>
+          <p>Memory is displaced into traces, sites, and mediations. What remains is no longer the warmth of repetition, but the deliberate staging of a past that must be curated, revisited, and made to speak again.</p>
+        </div>
+        <div class="ov-theory-card">
+          <p class="scholar">Thompson (2009)</p>
+          <p>Inherited stories do not arrive empty. They come entangled with debts, injuries, and unresolved claims that continue to structure the present and ask those who inherit them to reckon with what they oblige.</p>
+        </div>
+        <div class="ov-theory-card">
+          <p class="scholar">Stoler (2009)</p>
+          <p>Imperial archives were anxious and recursive, organized through categories that had to be continuously remade. Recovery is not enough. The archive's incoherence is part of its power.</p>
+        </div>
+        <div class="ov-theory-card">
+          <p class="scholar">Abu El-Haj (2023)</p>
+          <p>The problem may no longer be simple denial but disavowal. Truth can be public, documented, speakable, and still politically inert. Visibility is not justice. More records do not equal consequence.</p>
+        </div>
+        <div class="ov-theory-card">
+          <p class="scholar">Ellsworth (2005)</p>
+          <p>Pedagogy is not the delivery of stable content but an event in which the outside is drawn into thought, producing a hollow, an encounter, a topology the learner must inhabit rather than master from afar.</p>
+        </div>
+        <div class="ov-theory-card">
+          <p class="scholar">Trofanenko (2008)</p>
+          <p>The seduction of a single best narrative forecloses not only disagreement over interpretation, but attention to the fact that the source-world itself was built. Students must learn to see that building.</p>
+        </div>
+        <div class="ov-theory-card">
+          <p class="scholar">Agamben (2000)</p>
+          <p>There is remainder. There is remnant. There are histories whose most decisive dimensions exceed the recoverable document and the smooth exhibit label. Design cannot pretend otherwise.</p>
+        </div>
+        <div class="ov-theory-card">
+          <p class="scholar">Bruyneel (2021)</p>
+          <p>U.S. public life is structured by disavowal. A political memory that requires Indigeneity to remain both foundational and faint, visible enough to stabilize the origin story, dim enough not to unsettle its present claims.</p>
+        </div>
+      </div>
+
+      <p class="ov-section-head">How the Game Works</p>
+      <p>
+        Four roles, five rooms, one archive under pressure. The Lead Auditor, Evidence Keeper, Archive Analyst, and Signal Monitor approach the same historical record through genuinely different first questions. The archive itself changes depending on the disciplinary lens through which one enters it. That is not a feature of the game. It is the argument the game is making.
+      </p>
+      <p>
+        The rooms move from curated scarcity (a spare official record designed to feel orderly and complete) through broadcast saturation, echo corroboration, and algorithmic feed overload, until the final room presents an AI-generated synthesis that is smooth, coherent, and quietly devastating in what it has metabolized into clarity. The problem is never whether the summary is accurate in some narrow sense. The problem is what its smoothness has submerged.
+      </p>
+      <p>
+        Students end not by escaping the archive but by producing three forms of writing: a historical claim, a curation claim, and a limitation claim. The limitation claim is the one that matters most. It is not a failure of historical thinking. It is one of its hardest civic forms.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     OVERLAY - ABOUT ME
+════════════════════════════════════════════════ -->
+<div class="overlay-panel" id="panel-creator" role="dialog" aria-label="About Marie Connor" aria-modal="true">
+  <button class="overlay-close" onclick="closePanel('panel-creator')">✕ Close</button>
+  <div class="overlay-inner">
+    <p class="ov-eyebrow">About the Creator</p>
+    <h2 class="ov-title">Marie Connor</h2>
+    <p style="font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold2);margin-bottom:2rem;">
+      Doctoral Candidate, Teachers College, Columbia University<br>
+      <a href="mailto:mc5830@tc.columbia.edu" style="color:var(--gold2);text-decoration:none;">mc5830@tc.columbia.edu</a>
+    </p>
+
+    <div class="ov-body">
+
+      <div class="ov-photo-grid">
+        <figure>
+          <img src="img/classroom_wide.jpg" alt="Marie's APUSH classroom at DREAM Charter School, Bronx, students working with documents" loading="lazy">
+          <figcaption>APUSH classroom, DREAM Charter School, Bronx</figcaption>
+        </figure>
+        <figure>
+          <img src="img/students_game.jpg" alt="Students engaged in historical simulation wearing headbands with document names" loading="lazy">
+          <figcaption>Historical simulation at DREAM, students as archivists</figcaption>
+        </figure>
+        <figure>
+          <img src="img/classroom_group.jpg" alt="Students in close document analysis at DREAM Charter School" loading="lazy">
+          <figcaption>Close source work, the ordinary grammar of the classroom</figcaption>
+        </figure>
+      </div>
+
+      <p class="ov-section-head">Why this work</p>
+      <p>
+        I have been teaching history in Brooklyn and the Bronx for twelve years, and for most of that time I thought the problem was what was missing from the archive. The documents that had been destroyed or never created, the voices that had been excluded from the record, the histories that school curriculum had decided did not need to be there. I still think that problem is real. But somewhere in the middle of teaching AP U.S. History in a Bronx classroom where my students were brilliant and curious and almost entirely absent from the standard archival record, I started to see a different problem layering on top of it.
+      </p>
+      <p>
+        The record was no longer only sparse. It was also, increasingly, everywhere. My students were swimming in it. Social media feeds full of ranked and smoothed historical content, AI summaries that arrived wearing the face of comprehensiveness, citation chains that had been repeated so many times they had calcified into the look of consensus. The question was no longer only whose histories were missing. It was also: how do you teach students to read the surface that makes the missing invisible?
+      </p>
+
+      <div class="ov-pull">
+        <p>I keep returning to that moment before the source packet is assembled in the history classroom, a small hush that now feels anything but neutral. By the time students are asked to source, contextualize, or corroborate a document, someone else has already decided what survives, what counts as evidence, what becomes searchable, and what stays out of view.</p>
+        <cite>Marie Connor, CILR Memo #1, Teachers College (2025)</cite>
+      </div>
+
+      <p>
+        That recognition has become the engine of this project. The escape room is not a gamified lesson on top of a curriculum. It is a pedagogical argument about where historical thinking has to begin. Not at interpretation. Earlier. At the level of what was preserved, what was captioned, what was ranked, and what was made to feel complete before a student ever touched it.
+      </p>
+
+      <p class="ov-section-head">The classroom that made this necessary</p>
+      <p>
+        When I took over the AP U.S. History program at DREAM Charter High School in the Bronx, the pass rate was three percent. Not because my students could not do the work. Because the curriculum had not been built to trust them with it. Over two years, grounded in inquiry-driven instruction and a conviction that archival thinking belongs in the hands of seventeen-year-olds in the South Bronx, the pass rate reached fifty-nine percent. That number matters. But what matters more is what happened in the room. Once students understood that the packet they were handed was itself an argument, that someone had already decided which sources counted and what the questions should be, they stopped being passive recipients of an already arranged past and started being answerable curators of it. That shift is what this game is trying to produce at scale.
+      </p>
+
+      <div class="ov-photo-grid" style="grid-template-columns:1fr 1fr;">
+        <figure>
+          <img src="img/classroom_wall.jpg" alt="DREAM Charter classroom with student-created APIE wall covering entire wall space" loading="lazy">
+          <figcaption>The APIE wall at DREAM, student-curated historical organizing framework</figcaption>
+        </figure>
+        <figure>
+          <img src="img/classroom_station.jpg" alt="Students working at document stations on Reagan-era history at DREAM" loading="lazy">
+          <figcaption>Station-based source analysis, students choosing their own entry points</figcaption>
+        </figure>
+      </div>
+
+      <p class="ov-section-head">What drives the research</p>
+      <p>
+        I am a doctoral candidate in the Curriculum and Teaching department at Teachers College, Columbia University, working with questions that have followed me out of the classroom and into the graduate seminar. My research examines how critical archival theory reshapes the historical thinking we ask of students, shifting inquiry from interpreting primary sources toward analyzing how records are selected, mediated, preserved, and refused across time. The dissertation sits at the intersection of archival pedagogy, K-12 curriculum design, and the conditions under which evidence-making becomes part of ordinary classroom life rather than remaining a luminous exception within it.
+      </p>
+      <p>
+        That question is personal as much as it is scholarly. I grew up in a military family, moved constantly, graduated high school in Japan in three years, then spent several years cooking in Michelin-starred kitchens in New York before turning to teaching. All of those experiences taught me something about what it means to work inside systems that have already decided what counts, what gets preserved, and who is positioned as a knower. The kitchen has a rail that tells you what to fire and when. The archive has a packet that tells you what to read and how. The question I keep asking is who built those systems, and what would it mean to teach students to read the building itself rather than just what is inside it.
+      </p>
+
+      <p class="ov-section-head">Contact</p>
+      <p>Questions about the project, requests to use it in your classroom, research inquiries, collaboration, feedback, or just wanting to talk archival pedagogy and history curriculum.</p>
+
+      <div class="ov-form-2col">
+        <div class="ov-form-group">
+          <label for="c-name">Your Name</label>
+          <input type="text" id="c-name" placeholder="First and last name">
+        </div>
+        <div class="ov-form-group">
+          <label for="c-email">Email Address</label>
+          <input type="email" id="c-email" placeholder="your@email.com">
+        </div>
+      </div>
+      <div class="ov-form-group">
+        <label for="c-role">I am a</label>
+        <select id="c-role">
+          <option value="">Select your role</option>
+          <option>Student</option>
+          <option>Teacher or Educator</option>
+          <option>Curriculum Designer</option>
+          <option>Researcher or Academic</option>
+          <option>School or Network Leader</option>
+          <option>Just curious</option>
+        </select>
+      </div>
+      <div class="ov-form-group">
+        <label for="c-subject">Subject</label>
+        <input type="text" id="c-subject" placeholder="What is this about?">
+      </div>
+      <div class="ov-form-group">
+        <label for="c-message">Message</label>
+        <textarea id="c-message" placeholder="Write your message here."></textarea>
+      </div>
+      <button class="btn btn-gold" onclick="sendContact()" style="margin-top:0.5rem;">Send Message</button>
+      <div class="feedback-msg" id="contact-fb" role="alert" style="margin-top:0.8rem;"></div>
+      <p style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-dim);margin-top:0.6rem;">Your email will only be used to respond to your message.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     GAME SHELL
+════════════════════════════════════════════════ -->
+<div id="game-shell" style="display:none;">
+
+  <button id="sticky-proceed" aria-label="Proceed to next room"></button>
+
+  <!-- LOADING -->
+  <div id="loading-screen" style="position:fixed;inset:0;background:var(--bg-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;gap:1.2rem;">
+    <p class="loading-sub">Initializing archive</p>
+    <p class="loading-title">Escape the Archive</p>
+    <p class="loading-sub" style="font-size:0.6rem;letter-spacing:0.2em;margin-top:0.1rem;">Drowning in the Record</p>
+    <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+  </div>
+
+  <!-- ROLE SELECT -->
+  <div id="role-screen" style="display:none;min-height:100vh;background:var(--bg-dark);padding:3rem 1.5rem;">
+    <div style="text-align:center;margin-bottom:2.5rem;">
+      <p style="font-family:var(--font-mono);font-size:0.66rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold2);margin-bottom:0.8rem;">Select your role</p>
+      <h2 style="font-family:var(--font-serif);font-size:clamp(1.8rem,4vw,2.8rem);color:var(--paper);margin-bottom:0.6rem;">Who are you in the archive?</h2>
+      <p style="color:var(--text-dim);font-size:0.9rem;max-width:520px;margin:0 auto;">Each role gives you different access to the collection and different responsibilities for what gets preserved. You cannot switch once you begin.</p>
+    </div>
+
+    <div class="role-grid">
+      <div class="role-card" onclick="selectRole('lead',this)" tabindex="0" role="button" aria-label="Select Lead Auditor role" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectRole('lead',this);}">
+        <span class="role-icon" aria-hidden="true">🔍</span>
+        <p class="role-name">Lead Auditor</p>
+        <p class="role-tagline">What can be claimed?</p>
+        <p class="role-desc">You evaluate whether the archive's public-facing record does what it claims to do. You see artifacts first and make final determinations about what gets included.</p>
+      </div>
+      <div class="role-card" onclick="selectRole('keeper',this)" tabindex="0" role="button" aria-label="Select Evidence Keeper role" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectRole('keeper',this);}">
+        <span class="role-icon" aria-hidden="true">📁</span>
+        <p class="role-name">Evidence Keeper</p>
+        <p class="role-tagline">What has been preserved?</p>
+        <p class="role-desc">You track, organize, and cross-reference the documentary record, surfacing connections others miss and flagging what is absent from the collection.</p>
+      </div>
+      <div class="role-card" onclick="selectRole('analyst',this)" tabindex="0" role="button" aria-label="Select Archive Analyst role" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectRole('analyst',this);}">
+        <span class="role-icon" aria-hidden="true">👁️</span>
+        <p class="role-name">Archive Analyst</p>
+        <p class="role-tagline">What does the record refuse to say?</p>
+        <p class="role-desc">You read across the collection for patterns, gaps, and silences, examining what the archive includes and what its omissions reveal about who built it.</p>
+      </div>
+      <div class="role-card" onclick="selectRole('signal',this)" tabindex="0" role="button" aria-label="Select Signal Monitor role" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectRole('signal',this);}">
+        <span class="role-icon" aria-hidden="true">📡</span>
+        <p class="role-name">Signal Monitor</p>
+        <p class="role-tagline">What is the feed showing you?</p>
+        <p class="role-desc">You watch the information environment for bias, distortion, and manipulation including algorithmic curation. You decide which signals are earned and which are noise.</p>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border-dim);">
+      <p style="color:var(--text-dim);font-size:0.75rem;font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.6rem;">Educator access — configure archive ledger</p>
+      <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+        <input class="game-input" id="sheets-url-input" style="max-width:360px;" placeholder="Paste Google Sheets web app URL">
+        <button class="btn btn-ghost" onclick="saveSheetURL()">Save</button>
+        <button class="btn btn-ghost" onclick="testSheetURL()">Test connection</button>
+      </div>
+      <p style="color:var(--text-dim);font-size:0.68rem;margin-top:0.5rem;font-family:var(--font-mono);" id="sheets-status"></p>
+      <div class="storage-notice" style="max-width:480px;margin:0.8rem auto 0;">
+        Student responses are saved locally in this browser session, namespaced by role. Each role has separate storage. No data leaves this device unless a Sheets URL is configured above.
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME AREA -->
+  <div id="game-area" style="display:none;">
+    <div class="room-header" role="banner">
+      <div>
+        <p class="room-label" id="room-label">Prologue</p>
+        <p class="room-title" id="room-title">The Intake Desk</p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem;">
+        <span id="progress-label" aria-live="polite">Prologue</span>
+        <div class="room-progress" role="img" aria-label="Progress indicator">
+          <div class="prog-dot active" aria-hidden="true"></div>
+          <div class="prog-dot" aria-hidden="true"></div>
+          <div class="prog-dot" aria-hidden="true"></div>
+          <div class="prog-dot" aria-hidden="true"></div>
+          <div class="prog-dot" aria-hidden="true"></div>
+          <div class="prog-dot" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="room-wrap">
+
+      <!-- PROLOGUE -->
+      <div class="room-panel visible" id="room-0">
+        <div id="role-orientation-box" class="role-orientation" hidden>
+          <p class="ro-label" id="role-orientation-label"></p>
+          <p class="ro-text" id="role-orientation-text"></p>
+        </div>
+        <div class="task-box">
+          <p class="task-label">Your task — Prologue: The Intake Desk</p>
+          <p class="task-text">You have been granted access to a restricted archival collection. Before proceeding, complete the intake protocol: annotate the exhibit brief, examine three document <span data-tip="hotspot" style="border-bottom:1px dashed var(--gold);cursor:help;">hotspots</span>, and acknowledge the <span data-tip="misalignment" style="border-bottom:1px dashed var(--gold);cursor:help;">misalignments</span> you discover.</p>
+        </div>
+
+        <div class="document-frame">
+          <div class="doc-meta"><span>Exhibit Brief</span><span>RESTRICTED — Level 2 Access</span><span>Archive Reference: ETA-2024-001</span></div>
+          <div class="doc-title">Preliminary Exhibit Packet: "Comprehensive Account of the 1943 Administrative Relocation"</div>
+          <div class="doc-body" style="margin-top:0.8rem;">
+            <p>This exhibit presents a comprehensive account of the administrative relocation procedures implemented during the 1943 wartime period. All records have been reviewed for accuracy and completeness. The archive certifies that the materials included represent the full documentary record available for this period.</p>
+            <p style="margin-top:0.8rem;">Sources include: official correspondence, administrative memoranda, photographic documentation, and government-certified witness accounts. Materials have been organized chronologically. Gaps in the record reflect <strong>voluntary non-participation</strong> by certain individuals who chose not to provide statements.</p>
+            <p style="margin-top:0.8rem;">The exhibit aims to present a neutral, <strong>comprehensive account</strong> of this historical period. This is an <strong>administrative relocation</strong> record compiled for educational and research purposes.</p>
+            <div style="margin-top:1.2rem;">
+              <p style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold2);margin-bottom:0.6rem;">Examine each highlighted phrase — click or press Enter on all three to continue</p>
+              <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+                <button class="btn btn-ghost hotspot-btn" data-hotspot="1" data-tip="hotspot" aria-expanded="false" aria-controls="hotspot-reveal-1" style="font-size:0.78rem;border-color:var(--gold);">🔎 "voluntary non-participation"</button>
+                <button class="btn btn-ghost hotspot-btn" data-hotspot="2" data-tip="hotspot" aria-expanded="false" aria-controls="hotspot-reveal-2" style="font-size:0.78rem;border-color:var(--gold);">🔎 "comprehensive account"</button>
+                <button class="btn btn-ghost hotspot-btn" data-hotspot="3" data-tip="hotspot" aria-expanded="false" aria-controls="hotspot-reveal-3" style="font-size:0.78rem;border-color:var(--gold);">🔎 "administrative relocation"</button>
+              </div>
+            </div>
+            <div id="hotspot-reveal-1" hidden aria-live="polite" class="feedback-msg visible feedback-warn" style="margin-top:0.8rem;"><strong>Auditor finding — "voluntary non-participation":</strong> This phrase attributes the absence of testimony to individual choice rather than structural coercion. Individuals who did not provide statements may have been unable to, due to incarceration, displacement, fear of reprisal, or lack of access to the process. The framing conceals the conditions that shaped participation.</div>
+            <div id="hotspot-reveal-2" hidden aria-live="polite" class="feedback-msg visible feedback-warn" style="margin-top:0.8rem;"><strong>Auditor finding — "comprehensive account":</strong> "Comprehensive" is a claim, not a description. Archives are never comprehensive. They are curated. The assertion of completeness discourages future researchers from looking for what is missing. Comprehensiveness is a rhetorical posture, not an empirical fact.</div>
+            <div id="hotspot-reveal-3" hidden aria-live="polite" class="feedback-msg visible feedback-warn" style="margin-top:0.8rem;"><strong>Auditor finding — "administrative relocation":</strong> This is a euphemism. The historical record elsewhere names this as forced removal, incarceration, or internment. The WRA's own style guide directed staff to use institutional language to minimize the coercive character of the program. Language choice is not neutral. It shapes what the reader understands happened.</div>
+          </div>
+        </div>
+
+        <p class="section-head mt3">Step 1 — Intake Annotations</p>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem;line-height:1.65;">Answer all three prompts. Your responses are logged to the archive ledger for your educator. Once saved, you will unlock the hotspot examination above.</p>
+        <div class="mb2"><label for="annot-1" style="color:var(--paper2);font-size:0.85rem;display:block;margin-bottom:0.4rem;">1. What does this exhibit claim to be about?</label><textarea class="game-textarea" id="annot-1" aria-required="true" placeholder="In your own words, what does the exhibit say it documents?"></textarea></div>
+        <div class="mb2"><label for="annot-2" style="color:var(--paper2);font-size:0.85rem;display:block;margin-bottom:0.4rem;">2. What sources does it say it draws from?</label><textarea class="game-textarea" id="annot-2" aria-required="true" placeholder="List the source types named in the brief."></textarea></div>
+        <div class="mb2"><label for="annot-3" style="color:var(--paper2);font-size:0.85rem;display:block;margin-bottom:0.4rem;">3. What seems off, unclear, or worth investigating further?</label><textarea class="game-textarea" id="annot-3" aria-required="true" placeholder="Note anything that strikes you as a gap, a problem, or a question."></textarea></div>
+        <button class="btn btn-primary" id="annot-save-btn" onclick="saveAnnotations()">Save Annotations and Unlock Hotspots</button>
+        <div class="feedback-msg" id="fb-annot" role="alert"></div>
+        <div id="hotspot-zone" hidden style="margin-top:1.5rem;"><div class="feedback-msg visible feedback-info" style="margin-bottom:1rem;" role="status">Annotations saved. Now click all three hotspot buttons in the exhibit brief above to examine the language. The proceed button will appear once all three are examined.</div></div>
+        <div id="prologue-proceed" hidden class="mt4" role="status" aria-live="polite">
+          <div class="feedback-msg visible feedback-ok">All three hotspots examined. Intake protocol complete.</div>
+          <button class="btn btn-gold mt2" onclick="goToRoom(1)">Proceed to Room I</button>
+        </div>
+      </div><!-- /room-0 -->
+
+      <!-- ROOM I -->
+      <div class="room-panel" id="room-1">
+        <div class="task-box"><p class="task-label">Room I — Curated Scarcity</p><p class="task-text">A small set of official records is available. Before additional evidence becomes accessible, decide whether to trust the administrative frame and articulate what the scarcity itself might mean as evidence.</p></div>
+        <p class="section-head">Official Administrative Record</p>
+        <div class="document-frame"><div class="doc-meta"><span class="voice-tag voice-official">Official</span><span>War Relocation Authority · Memorandum 7-C · March 1943</span></div><div class="doc-title">Transfer Processing — Administrative Summary</div><div class="doc-body">All transfers were conducted in accordance with Executive Order 9066. Processing centers reported no significant incidents. Individuals were provided with storage arrangements for property and were informed of temporary housing provisions. Records of transfer completion are maintained at the regional office.</div></div>
+        <div class="document-frame"><div class="doc-meta"><span class="voice-tag voice-official">Official</span><span>Internal Memo · April 1943 · Classified Level B</span></div><div class="doc-title">Property Disposition — Note to File</div><div class="doc-body">Property disposal proceeded under standard provisions. Records indicate that in cases where storage was unavailable, property was disposed of by local authorities. Itemized records were not required for disposals under $50 in value. Documentation is incomplete for the March to April period due to administrative transition.</div></div>
+
+        <p class="section-head mt3">Euphemism Decoder <span style="font-size:0.72rem;color:var(--text-dim);font-family:var(--font-mono);text-transform:none;letter-spacing:0;">— drag terms to matching phrases, or use the dropdown fallback</span></p>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;line-height:1.65;">Each official phrase conceals a plain-language reality. Drag the term that most precisely describes what the phrase obscures. Keyboard users: press Enter on a term to select it, then Tab to a phrase and press Enter to place it.</p>
+        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1.2rem;" role="list" aria-label="Available terms to place">
+          <div class="dnd-chip" data-value="systematic destruction">systematic destruction</div>
+          <div class="dnd-chip" data-value="forced removal">forced removal</div>
+          <div class="dnd-chip" data-value="administrative delay">administrative delay</div>
+          <div class="dnd-chip" data-value="community testimony">community testimony</div>
+          <div class="dnd-chip" data-value="property seizure">property seizure</div>
+        </div>
+        <div style="display:grid;gap:0.9rem;" role="list">
+          <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;"><span style="color:var(--paper2);font-size:0.85rem;min-width:240px;font-style:italic;">"property disposed of by local authorities"</span><div class="dnd-zone" data-zone="euph-a" role="listitem" tabindex="0" aria-label="Drop zone for property disposed of by local authorities" style="min-width:190px;">Drop here</div></div>
+          <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;"><span style="color:var(--paper2);font-size:0.85rem;min-width:240px;font-style:italic;">"transfer processing conducted"</span><div class="dnd-zone" data-zone="euph-b" role="listitem" tabindex="0" aria-label="Drop zone for transfer processing conducted" style="min-width:190px;">Drop here</div></div>
+          <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;"><span style="color:var(--paper2);font-size:0.85rem;min-width:240px;font-style:italic;">"documentation is incomplete"</span><div class="dnd-zone" data-zone="euph-c" role="listitem" tabindex="0" aria-label="Drop zone for documentation is incomplete" style="min-width:190px;">Drop here</div></div>
+        </div>
+        <details style="margin-top:1rem;"><summary style="color:var(--text-dim);font-size:0.78rem;cursor:pointer;font-family:var(--font-mono);letter-spacing:0.06em;list-style:none;">Use dropdown fallback instead</summary>
+          <div style="margin-top:0.8rem;display:grid;gap:0.6rem;">
+            <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap;"><label for="euph-sel-a" style="color:var(--paper2);font-size:0.82rem;min-width:240px;font-style:italic;">"property disposed of"</label><select class="game-select" id="euph-sel-a"><option value="">select</option><option>systematic destruction</option><option>forced removal</option><option>administrative delay</option></select></div>
+            <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap;"><label for="euph-sel-b" style="color:var(--paper2);font-size:0.82rem;min-width:240px;font-style:italic;">"transfer processing"</label><select class="game-select" id="euph-sel-b"><option value="">select</option><option>systematic destruction</option><option>forced removal</option><option>administrative delay</option></select></div>
+            <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap;"><label for="euph-sel-c" style="color:var(--paper2);font-size:0.82rem;min-width:240px;font-style:italic;">"documentation incomplete"</label><select class="game-select" id="euph-sel-c"><option value="">select</option><option>systematic destruction</option><option>forced removal</option><option>administrative delay</option></select></div>
+            <button class="btn btn-ghost" style="width:fit-content;" onclick="checkEuph()">Check answers</button>
+          </div>
+        </details>
+        <div class="feedback-msg" id="fb-euph" role="alert"></div>
+        <div id="euph-drawer-btn" hidden style="margin-top:1rem;"><button class="btn btn-teal" id="witness-toggle-btn" onclick="unlockWitness()">Access witness testimony</button></div>
+        <div class="witness-drawer mt2" id="witness-drawer" role="region" aria-label="Witness testimony">
+          <div class="witness-content">
+            <p class="section-head">Witness Testimony — Oral History Fragment</p>
+            <div class="document-frame" style="margin-bottom:0;"><div class="doc-meta"><span class="voice-tag voice-testimony">Testimony</span><span>Collected 1982 · Regional Oral History Project · Declassified 1992</span></div><div class="doc-body">"They came in the morning. We had forty-eight hours — they said one suitcase each. My father's business records, thirty years of ledgers — gone. We were told there would be storage. There was no storage. We never saw those things again. When I asked after the war, they said the records had been 'administratively processed.' That is a phrase that means nothing happened and everything happened at the same time."</div></div>
+          </div>
+        </div>
+        <div data-roles="lead" class="mt4"><p class="section-head">Lead Judgment</p><p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;">Does the official record accurately represent what the evidence suggests occurred? Be specific about which claims hold and which do not.</p><label for="lead-judgment" class="sr-only">Lead Auditor judgment</label><textarea class="game-textarea" id="lead-judgment" placeholder="State your judgment. Reference specific language from the documents."></textarea><button class="btn btn-primary mt1" onclick="submitLeadJudgment()">Record judgment</button><div class="feedback-msg" id="fb-r1" role="alert"></div></div>
+        <div data-roles="analyst,keeper" class="mt4"><p class="section-head">Limitation Claim</p><p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;">Articulate what this archive cannot tell you and why that absence matters.</p><label for="limitation-claim" class="sr-only">Limitation claim</label><textarea class="game-textarea" id="limitation-claim" placeholder="What cannot be known from this record alone? What would a fuller archive need to include?"></textarea><button class="btn btn-primary mt1" onclick="buildLimitationClaimScaffold()">Build limitation claim</button><div class="feedback-msg" id="fb-r1-lim" role="alert"></div></div>
+        <div data-roles="signal" class="mt4"><p class="section-head">Signal Analysis</p><p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;">What signals in this official record are meant to generate trust, and are those signals <span data-tip="earned" style="border-bottom:1px dashed var(--gold);cursor:help;">earned</span>?</p><label for="signal-r1" class="sr-only">Signal analysis Room I</label><textarea class="game-textarea" id="signal-r1" placeholder="What does the official framing use to claim authority? Is that authority earned?"></textarea><button class="btn btn-primary mt1" onclick="submitSignalR1()">Record signal analysis</button><div class="feedback-msg" id="fb-r1-sig" role="alert"></div></div>
+        <div class="frustration-banner" id="frust-banner-1" role="alert"><p><strong>Frustration recognized.</strong> This room is designed to be genuinely difficult. <a href="#" onclick="recoverFrustrationDocument(1);return false;" style="color:var(--gold2);">Read a recovery note</a></p></div>
+        <div style="display:none;" id="frust-recog-1" class="feedback-msg visible feedback-info" role="alert"></div>
+        <div class="feedback-msg" id="fb-r1-frust" role="alert"></div>
+        <div id="r1-proceed" hidden class="mt4" role="status"><button class="btn btn-gold" onclick="goToRoom(2)">Proceed to Room II</button></div>
+      </div><!-- /room-1 -->
+
+      <!-- ROOM II -->
+      <div class="room-panel" id="room-2">
+        <div class="task-box"><p class="task-label">Room II — Broadcast Saturation</p><p class="task-text">An abundance of sources is now available. Classify each one: is its claim <span data-tip="earned" style="border-bottom:1px dashed var(--gold);cursor:help;">earned</span> or <span data-tip="unearned" style="border-bottom:1px dashed var(--gold);cursor:help;">unearned</span>? Then identify what the saturation obscures.</p></div>
+        <div style="display:flex;gap:0.8rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;"><p style="color:var(--text-dim);font-size:0.82rem;font-family:var(--font-mono);">Sources classified: <span class="count-pill"><span id="r2-tagged-count">0</span> / 5</span></p><p style="color:var(--text-dim);font-size:0.76rem;">(Rate at least 5 to unlock the analysis section)</p></div>
+        <div class="signal-feed" role="list">
+          <div class="signal-item" role="listitem"><div class="signal-rank" aria-hidden="true">1</div><div class="signal-body"><p class="signal-headline">Associated Press Wire — "Relocation Proceeds Smoothly, Officials Say"</p><p class="signal-meta"><span>March 24, 1943</span><span>Reprinted in 47 regional newspapers</span><span class="voice-tag voice-press">Press</span></p><p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">WRA officials report transfers proceeding ahead of schedule. Source: WRA press release. Housing described as "adequate for the circumstances."</p></div><div class="signal-controls" role="group" aria-label="Classify AP wire report"><button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="tagSource(this,'ap-wire','earned')">Earned</button><button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="tagSource(this,'ap-wire','unearned')">Unearned</button></div></div>
+          <div class="signal-item" role="listitem"><div class="signal-rank" aria-hidden="true">2</div><div class="signal-body"><p class="signal-headline">Photograph — "Departure Platform, Union Station"</p><p class="signal-meta"><span>April 1943</span><span>WRA official photographer</span><span class="voice-tag voice-official">Official</span></p><p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Families with luggage at train platform. WRA caption: "Evacuees depart voluntarily for new homes in the interior." Taken and captioned by WRA. No independent press present.</p></div><div class="signal-controls" role="group" aria-label="Classify WRA photograph"><button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="tagSource(this,'wra-photo','earned')">Earned</button><button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="tagSource(this,'wra-photo','unearned')">Unearned</button></div></div>
+          <div class="signal-item" role="listitem"><div class="signal-rank" aria-hidden="true">3</div><div class="signal-body"><p class="signal-headline">Radio Broadcast — "America's Home Front" (NBC Blue Network)</p><p class="signal-meta"><span>March 1943</span><span>NBC Blue Network</span><span class="voice-tag voice-press">Press</span></p><p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">"Full cooperation, many expressed gratitude." Source stated on-air: WRA press release read verbatim.</p></div><div class="signal-controls" role="group" aria-label="Classify radio broadcast"><button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="tagSource(this,'radio','earned')">Earned</button><button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="tagSource(this,'radio','unearned')">Unearned</button></div></div>
+          <div class="signal-item" role="listitem"><div class="signal-rank" aria-hidden="true">4</div><div class="signal-body"><p class="signal-headline">Community Letter — Intercepted by WRA Censor</p><p class="signal-meta"><span>April 1943</span><span>Personal correspondence · never delivered · declassified 1992</span><span class="voice-tag voice-testimony">Testimony</span></p><p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">"The barracks are not what they told us. There is one stove for forty people. The children are sick. We have been told we cannot leave. I am writing because I do not know if anyone will read this."</p></div><div class="signal-controls" role="group" aria-label="Classify intercepted letter"><button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="tagSource(this,'letter','earned')">Earned</button><button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="tagSource(this,'letter','unearned')">Unearned</button></div></div>
+          <div class="signal-item" role="listitem"><div class="signal-rank" aria-hidden="true">5</div><div class="signal-body"><p class="signal-headline">Internal WRA Survey — "Evacuee Satisfaction Assessment"</p><p class="signal-meta"><span>May 1943</span><span>Internal · not published</span><span class="voice-tag voice-official">Official</span></p><p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Conducted by WRA staff. Negative respondents were flagged as "disloyal elements." No response option for coercive conditions. Results cited publicly as evidence of program success.</p></div><div class="signal-controls" role="group" aria-label="Classify WRA survey"><button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="tagSource(this,'wra-survey','earned')">Earned</button><button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="tagSource(this,'wra-survey','unearned')">Unearned</button></div></div>
+        </div>
+        <div id="r2-limitation-zone" hidden class="mt4"><p class="section-head">Saturation Analysis</p><p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;line-height:1.65;">What cannot be sustained, what claim fails, even in this saturated environment? What does the volume of official sources obscure rather than reveal?</p><label for="r2-limitation" class="sr-only">Saturation analysis response</label><textarea class="game-textarea" id="r2-limitation" placeholder="Even with all these sources, what remains unknowable? What does the saturation hide?"></textarea><button class="btn btn-primary mt1" onclick="submitLimitation()">Submit saturation analysis</button><div class="feedback-msg" id="fb-r2" role="alert"></div></div>
+        <div class="frustration-banner" id="frust-banner-2" role="alert"><p><strong>Frustration recognized.</strong> There are no clearly right answers here. <a href="#" onclick="recoverFrustrationDocument(2);return false;" style="color:var(--gold2);">Recovery note</a></p></div>
+        <div style="display:none;" id="frust-recog-2" class="feedback-msg visible feedback-info" role="alert"></div>
+        <div class="feedback-msg" id="fb-r2-frust" role="alert"></div>
+        <div id="r2-proceed" hidden class="mt4" role="status"><button class="btn btn-gold" onclick="goToRoom(3)">Proceed to Room III</button></div>
+      </div><!-- /room-2 -->
+
+      <!-- ROOM III -->
+      <div class="room-panel" id="room-3">
+        <div class="task-box"><p class="task-label">Room III — Echo Corroboration</p><p class="task-text">A widely repeated claim moves through a network of citations. Trace it to its origin. Determine whether repetition across media constitutes independent corroboration or mere echoing of a single source.</p></div>
+        <p class="section-head">Citation Network — Claim under investigation</p>
+        <div class="document-frame"><div class="doc-title">The claim: "Evacuees cooperated fully and expressed satisfaction with relocation arrangements."</div><div class="doc-body" style="margin-top:0.8rem;"><p style="margin-bottom:0.5rem;">This claim appears in the following sources in chronological order:</p><ol style="padding-left:1.4rem;color:var(--ink2);font-size:0.88rem;line-height:1.85;"><li><strong>1943:</strong> WRA press release (original source)</li><li><strong>1943:</strong> AP wire report (cites "WRA officials")</li><li><strong>1943:</strong> 47 regional newspapers (reprint AP wire verbatim)</li><li><strong>1944:</strong> Congressional testimony (cites "press reports")</li><li><strong>1947:</strong> Government history of the WRA (cites Congressional testimony)</li><li><strong>1952:</strong> High school textbook (cites 1947 government history)</li><li><strong>1975:</strong> Encyclopedia entry (cites 1952 textbook)</li><li><strong>1989:</strong> Academic article notes "longstanding historical consensus"</li></ol></div></div>
+        <div class="mt3"><p class="section-head">Citation Trace</p><p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;line-height:1.65;">How many truly independent sources are in this chain? Trace the claim back to its origin and explain how it achieved the appearance of consensus.</p><label for="r3-trace" class="sr-only">Citation trace response</label><textarea class="game-textarea" id="r3-trace" placeholder="How many independent sources are there? What does the citation chain reveal about how this claim became consensus?"></textarea><button class="btn btn-primary mt1" onclick="submitEchoTrace()">Submit citation trace</button><div class="feedback-msg" id="fb-r3" role="alert"></div></div>
+        <div id="r3-judgment-zone" hidden class="mt3"><p class="section-head">Corroboration Verdict</p><p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;">Is this claim independently corroborated, or is this echo corroboration?</p><div style="display:flex;gap:0.8rem;flex-wrap:wrap;" role="group" aria-label="Verdict options"><button class="btn btn-primary" onclick="submitLeadJudgmentR3('echo corroboration')">Echo corroboration</button><button class="btn btn-ghost" onclick="submitLeadJudgmentR3('independently corroborated')">Independently corroborated</button><button class="btn btn-ghost" onclick="submitLeadJudgmentR3('insufficient evidence to determine')">Insufficient evidence</button></div><div class="feedback-msg" id="fb-r3-j" role="alert"></div></div>
+        <div class="frustration-banner" id="frust-banner-3" role="alert"><p><strong>Frustration recognized.</strong> Echo corroboration is designed to look like consensus. <a href="#" onclick="recoverFrustrationDocument(3);return false;" style="color:var(--gold2);">Recovery note</a></p></div>
+        <div style="display:none;" id="frust-recog-3" class="feedback-msg visible feedback-info" role="alert"></div>
+        <div class="feedback-msg" id="fb-r3-frust" role="alert"></div>
+        <div id="r3-proceed" hidden class="mt4" role="status"><button class="btn btn-gold" onclick="goToRoom(4)">Proceed to Room IV</button></div>
+      </div><!-- /room-3 -->
+
+      <!-- ROOM IV -->
+      <div class="room-panel" id="room-4">
+        <div class="task-box"><p class="task-label">Room IV — Feed Overload</p><p class="task-text">You are inside an algorithmically-ranked feed. Rate each signal: is its trust indicator <span data-tip="earned" style="border-bottom:1px dashed var(--gold);cursor:help;">earned</span> or <span data-tip="unearned" style="border-bottom:1px dashed var(--gold);cursor:help;">unearned</span>? Rate all 6 to unlock the reflection.</p></div>
+        <div style="display:flex;gap:0.8rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;"><p style="color:var(--text-dim);font-size:0.82rem;font-family:var(--font-mono);">Signals rated: <span class="count-pill"><span id="r4-rated-count">0</span> / 6</span></p></div>
+        <div class="signal-feed" role="list">
+          <div class="signal-item" role="listitem"><div class="signal-rank" aria-hidden="true">1</div><div class="signal-body"><p class="signal-headline">TRENDING: "WRA Archives Finally Tell the Full Story" — HistoryNow.com</p><p class="signal-meta"><span>47,200 shares</span><span>Verified</span><span>Sponsored content</span><span class="voice-tag voice-algorithmic">Algorithmic</span></p><p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Summarizes WRA's own archive release. No independent historical analysis. Verified badge belongs to the platform domain, not content accuracy.</p></div><div class="signal-controls" role="group" aria-label="Rate HistoryNow article"><button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-1','earned')">Earned</button><button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-1','unearned')">Unearned</button></div></div>
+          <div class="signal-item" role="listitem"><div class="signal-rank" aria-hidden="true">2</div><div class="signal-body"><p class="signal-headline">Peer-reviewed article: "Censorship and the WRA Oral History Archive, 1942 to 1946"</p><p class="signal-meta"><span>212 shares</span><span>Journal of American History, 2018</span><span class="voice-tag voice-official">Academic</span></p><p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Peer-reviewed. Based on declassified censor files. Argues official oral history collection systematically excluded critical testimonies. Ranked below sponsored content by algorithm.</p></div><div class="signal-controls" role="group" aria-label="Rate JAH article"><button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-2','earned')">Earned</button><button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-2','unearned')">Unearned</button></div></div>
+          <div class="signal-item" role="listitem"><div class="signal-rank" aria-hidden="true">3</div><div class="signal-body"><p class="signal-headline">89K likes — "My grandfather's story of the camps"</p><p class="signal-meta"><span>89,400 likes, 31K retweets</span><span>Personal account</span><span class="voice-tag voice-testimony">First-person</span></p><p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Personal family history. High engagement due to emotional resonance. Factual claims consistent with declassified evidence. Not peer-reviewed, but primary testimony type.</p></div><div class="signal-controls" role="group" aria-label="Rate personal thread"><button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-3','earned')">Earned</button><button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-3','unearned')">Unearned</button></div></div>
+          <div class="signal-item" role="listitem"><div class="signal-rank" aria-hidden="true">4</div><div class="signal-body"><p class="signal-headline">Wikipedia: "Japanese American Internment" — Featured Article</p><p class="signal-meta"><span>Featured Article status</span><span>15,000+ edits</span><span class="voice-tag voice-algorithmic">Aggregated</span></p><p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Cites 200+ sources. Featured status indicates extensive review. Cannot be fully read in a feed scroll. Algorithm surfaces it as authoritative without users engaging with the sourcing.</p></div><div class="signal-controls" role="group" aria-label="Rate Wikipedia article"><button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-4','earned')">Earned</button><button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-4','unearned')">Unearned</button></div></div>
+          <div class="signal-item" role="listitem"><div class="signal-rank" aria-hidden="true">5</div><div class="signal-body"><p class="signal-headline">FLAGGED AS DISPUTED: "The internment was necessary for national security"</p><p class="signal-meta"><span>Platform dispute flag</span><span>Conservative history blog</span><span class="voice-tag voice-algorithmic">Flagged</span></p><p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">Flagged by platform content moderation. The flag signals dispute but does not say what the dispute is about or who flagged it. Is the flag itself an earned signal?</p></div><div class="signal-controls" role="group" aria-label="Rate flagged blog"><button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-5','earned')">Earned</button><button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-5','unearned')">Unearned</button></div></div>
+          <div class="signal-item" role="listitem"><div class="signal-rank" aria-hidden="true">6</div><div class="signal-body"><p class="signal-headline">Densho Digital Archive: Primary source collection</p><p class="signal-meta"><span>Not trending</span><span>Community-built archive</span><span class="voice-tag voice-testimony">Community</span></p><p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.4rem;line-height:1.6;">The largest archive of Japanese American incarceration records, built by and for the community. Generates no engagement signals. Ranked last. The algorithm de-prioritizes what it cannot measure.</p></div><div class="signal-controls" role="group" aria-label="Rate Densho archive"><button class="sig-btn" aria-pressed="false" data-tip="earned" onclick="rateSignal(this,'feed-6','earned')">Earned</button><button class="sig-btn" aria-pressed="false" data-tip="unearned" onclick="rateSignal(this,'feed-6','unearned')">Unearned</button></div></div>
+        </div>
+        <div id="r4-reflect-zone" hidden class="mt4"><p class="section-head">Feed Reflection</p><p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.8rem;line-height:1.65;">How did ranking, engagement counts, and platform signals shape what felt credible? Which signals were designed to feel like trust, and was that feeling earned?</p><label for="r4-reflect" class="sr-only">Feed reflection response</label><textarea class="game-textarea" id="r4-reflect" placeholder="Reflect on how the feed's architecture shaped your judgment. At least two sentences."></textarea><button class="btn btn-primary mt1" onclick="submitFeedReflection()">Submit reflection</button><div class="feedback-msg" id="fb-r4" role="alert"></div></div>
+        <div class="frustration-banner" id="frust-banner-4" role="alert"><p><strong>Frustration recognized.</strong> The feed is engineered to overwhelm. <a href="#" onclick="recoverFrustrationDocument(4);return false;" style="color:var(--gold2);">Recovery note</a></p></div>
+        <div style="display:none;" id="frust-recog-4" class="feedback-msg visible feedback-info" role="alert"></div>
+        <div class="feedback-msg" id="fb-r4-frust" role="alert"></div>
+        <div id="r4-proceed" hidden class="mt4" role="status"><button class="btn btn-gold" onclick="goToRoom(5)">Proceed to Room V</button></div>
+      </div><!-- /room-4 -->
+
+      <!-- ROOM V -->
+      <div class="room-panel" id="room-5">
+        <div class="task-box"><p class="task-label">Room V — Smooth Synthetic Coherence</p><p class="task-text">The final room: an AI-generated summary presented as authoritative, comprehensive, and definitive. Complete the seven-part Escape Protocol, a disciplined critical account of what the AI made disappear.</p></div>
+        <div class="document-frame" style="border-left-color:var(--sepia);background:#1a1610;"><div class="doc-meta" style="color:var(--sepia2);"><span class="voice-tag voice-algorithmic">AI-Generated</span><span>Archive Summary · Auto-generated · Version 3.1</span></div><div class="doc-title" style="color:var(--gold2);">Comprehensive Archive Summary: 1943 Relocation Program</div><div class="doc-body" style="margin-top:0.8rem;color:rgba(245,240,232,0.7);"><p>The 1943 administrative relocation program was carried out in accordance with federal directives and proceeded without significant disruption. Available records indicate that transferred individuals received housing and employment support at receiving facilities. Contemporary press coverage documented broad community cooperation with the relocation process.</p><p style="margin-top:0.7rem;">Oral history sources suggest mixed experiences, though the majority of testimonies collected through official programs reflect adaptation and community resilience. Property arrangements varied by individual circumstance. Administrative documentation from this period is partially incomplete due to wartime conditions.</p><p style="margin-top:0.7rem;">This summary draws on 847 archival items and represents a balanced synthesis of available evidence. Gaps in the record are noted where identified.</p></div></div>
+
+        <p class="section-head mt4">The Seven-Part Escape Protocol</p>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem;">Complete all seven fields (at least 10 characters each). Progress: <strong id="escape-progress" style="color:var(--gold2);" aria-live="polite">0 / 7</strong></p>
+        <div class="escape-grid">
+          <div class="escape-field"><p class="escape-field-label">1. Historical Claim</p><p class="escape-field-hint">What claim does the AI summary make about what happened?</p><label for="historical-claim" class="sr-only">Historical claim</label><textarea class="game-textarea" id="historical-claim" oninput="checkEscapeProgress()" placeholder="The AI claims that"></textarea></div>
+          <div class="escape-field"><p class="escape-field-label">2. Curation Claim</p><p class="escape-field-hint">What does the summary claim about its own sources and coverage?</p><label for="curation-claim" class="sr-only">Curation claim</label><textarea class="game-textarea" id="curation-claim" oninput="checkEscapeProgress()" placeholder="The summary claims its sources are"></textarea></div>
+          <div class="escape-field"><p class="escape-field-label">3. Limitation Claim</p><p class="escape-field-hint">What limitations does it acknowledge, and what does it fail to name?</p><label for="limitation-claim-v" class="sr-only">Limitation claim</label><textarea class="game-textarea" id="limitation-claim-v" oninput="checkEscapeProgress()" placeholder="It acknowledges X but fails to name"></textarea></div>
+          <div class="escape-field"><p class="escape-field-label">4. Saturation Note</p><p class="escape-field-hint">How does the summary use volume ("847 archival items") as a trust signal?</p><label for="saturation-note" class="sr-only">Saturation note</label><textarea class="game-textarea" id="saturation-note" oninput="checkEscapeProgress()" placeholder="The summary uses quantity to suggest"></textarea></div>
+          <div class="escape-field"><p class="escape-field-label">5. Handoff Decision</p><p class="escape-field-hint">Would you include this summary in the public archive? Justify.</p><label for="handoff-decision" class="sr-only">Handoff decision</label><textarea class="game-textarea" id="handoff-decision" oninput="checkEscapeProgress()" placeholder="My decision: yes / no / conditional, because"></textarea></div>
+          <div class="escape-field"><p class="escape-field-label">6. Remnant Statement</p><p class="escape-field-hint">What did the AI make disappear? Name specific evidence rendered invisible.</p><label for="remnant-statement" class="sr-only">Remnant statement</label><textarea class="game-textarea" id="remnant-statement" oninput="checkEscapeProgress()" placeholder="The AI erased or minimized"></textarea></div>
+          <div class="escape-field" style="border-color:var(--gold2);"><p class="escape-field-label" style="color:var(--gold2);">7. Your Exhibit Description</p><p class="escape-field-hint">Write a paragraph you would stand behind. Honest about gaps, specific about what is known, clear about what the archive cannot tell us.</p><label for="exhibit-description" class="sr-only">Exhibit description</label><textarea class="game-textarea" id="exhibit-description" style="min-height:140px;" oninput="checkEscapeProgress()" placeholder="In your own words: what happened, what we know, and what we cannot know"></textarea></div>
+        </div>
+        <button class="btn btn-gold mt3" id="escape-submit-btn" hidden onclick="submitEscapeProtocol()">Submit Escape Protocol</button>
+        <div class="feedback-msg" id="fb-r5" role="alert"></div>
+        <div id="escape-complete" hidden class="mt4" role="status" aria-live="polite">
+          <div style="background:var(--bg-panel);border:1px solid var(--gold2);padding:2rem;text-align:center;">
+            <p style="font-family:var(--font-mono);font-size:0.66rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold2);margin-bottom:0.8rem;">Archive Escape Complete</p>
+            <p style="font-family:var(--font-serif);font-size:1.6rem;color:var(--paper);margin-bottom:1rem;">You have escaped the record.</p>
+            <p style="color:var(--text-dim);font-size:0.9rem;max-width:500px;margin:0 auto 1.4rem;line-height:1.75;">The archive is still incomplete. It always will be. But now you know how to read the surface before you step. They do not become innocent. They become responsible. They do not leave the archive. They learn to enter it differently.</p>
+            <div style="background:var(--bg-card);border:1px solid var(--border-dim);padding:1.2rem;margin-top:1rem;text-align:left;"><p style="font-family:var(--font-mono);font-size:0.64rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--sepia2);margin-bottom:0.5rem;">Your exhibit description</p><p id="final-exhibit-text" style="font-style:italic;color:var(--paper2);font-size:0.9rem;line-height:1.75;"></p></div>
+          </div>
+          <div style="display:flex;gap:0.8rem;margin-top:1.2rem;flex-wrap:wrap;">
+            <a href="contribute.html" class="btn btn-teal">Contribute a source to the archive</a>
+            <button class="btn btn-ghost" onclick="document.getElementById('game-shell').style.display='none';document.getElementById('landing').style.display='flex';">Return to landing</button>
+          </div>
+        </div>
+      </div><!-- /room-5 -->
+
+    </div><!-- /room-wrap -->
+  </div><!-- /game-area -->
+</div><!-- /game-shell -->
+
+<div class="ledger-toast" id="ledger-toast" role="status" aria-live="polite"></div>
+
+<script>
+// Landing to game transition
+function beginGame() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('game-shell').style.display = 'block';
+}
+
+// Overlay panel controls
+function openPanel(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById(id).scrollTop = 0;
+}
+function closePanel(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+// Close on Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.overlay-panel.open').forEach(p => p.classList.remove('open'));
+    document.body.style.overflow = '';
+  }
+});
+
+// Contact form
+async function sendContact() {
+  const name    = document.getElementById('c-name')?.value.trim();
+  const email   = document.getElementById('c-email')?.value.trim();
+  const role    = document.getElementById('c-role')?.value;
+  const subject = document.getElementById('c-subject')?.value.trim();
+  const message = document.getElementById('c-message')?.value.trim();
+  if (!name || !email || !message) {
+    showFeedback('contact-fb','warn','Please fill in your name, email, and message.');
+    return;
+  }
+  const sheetsUrl = localStorage.getItem('sheetsUrl') || '';
+  const payload = { action: 'contact', timestamp: new Date().toISOString(), name, email, role, subject, message };
+  try {
+    if (sheetsUrl) {
+      await fetch(sheetsUrl, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload), mode:'no-cors' });
+    }
+  } catch(e) {}
+  showFeedback('contact-fb','ok','Message received. I will be in touch soon.');
+  ['c-name','c-email','c-subject','c-message'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  const sel = document.getElementById('c-role'); if(sel) sel.selectedIndex = 0;
+}
+
+// Signal Monitor Room I fallback
+function submitSignalR1() {
+  const v = document.getElementById('signal-r1')?.value.trim();
+  if (!v || v.length < 15) { showFeedback('fb-r1-sig','warn','Articulate your signal analysis in at least one full sentence.'); document.getElementById('signal-r1')?.focus(); return; }
+  S.r1.claimSubmitted = true;
+  showFeedback('fb-r1-sig','ok','Signal analysis recorded. You may proceed to Room II.');
+  const proceed = document.getElementById('r1-proceed');
+  if (proceed) { proceed.removeAttribute('hidden'); setTimeout(()=>proceed.scrollIntoView({behavior:'smooth',block:'nearest'}),200); }
+  setStickyProceed('Proceed to Room II', () => goToRoom(2));
+  logEvent('signal_r1', { length: v.length });
+}
+
+// Sticky body class
+window.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('sticky-proceed');
+  if (!btn) return;
+  const obs = new MutationObserver(() => { document.body.classList.toggle('has-sticky', btn.style.display !== 'none'); });
+  obs.observe(btn, { attributes: true, attributeFilter: ['style'] });
+});
+</script>
+<script src="memory.js"></script>
+</body>
+</html>
