@@ -136,6 +136,25 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// ── LOADING BAR ───────────────────────────────────────────────
+function startLoadingBar() {
+  const bar = document.getElementById('loading-bar');
+  let w = 0;
+  const iv = setInterval(() => {
+    w += Math.random() * 18 + 4;
+    if (w >= 100) { w = 100; clearInterval(iv); }
+    if (bar) bar.style.width = w + '%';
+    if (w >= 100) {
+      setTimeout(() => {
+        const ls = document.getElementById('loading-screen');
+        const rs = document.getElementById('role-screen');
+        if (ls) ls.style.display = 'none';
+        if (rs) rs.style.display = 'block';
+      }, 350);
+    }
+  }, 80);
+}
+
 // ── ARCHIVE ENTRY SYNC ────────────────────────────────────────
 // Called the moment the student clicks "Enter the Archive"
 function logArchiveEntry() {
