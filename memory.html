@@ -1484,8 +1484,7 @@ body.has-sticky { padding-bottom: 60px; }
 function beginGame() {
   document.getElementById('landing').style.display = 'none';
   document.getElementById('game-shell').style.display = 'block';
-  // Show role screen immediately — no loading bar needed
-  const rs = document.getElementById('role-screen');
+  var rs = document.getElementById('role-screen');
   if (rs) rs.style.display = 'block';
   if (typeof logArchiveEntry === 'function') logArchiveEntry();
 }

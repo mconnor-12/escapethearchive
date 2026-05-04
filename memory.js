@@ -120,6 +120,8 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+function startLoadingBar() {}  // removed — no longer needed
+
 // ── ARCHIVE ENTRY SYNC ────────────────────────────────────────
 // Called the moment the student clicks "Enter the Archive"
 function logArchiveEntry() {
