@@ -87,9 +87,7 @@ function showToast(msg, dur = 2800) {
 // ── STARTUP ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   // Seed the default Sheets URL if none saved yet
-  if (!localStorage.getItem(SHEETS_URL_KEY)) {
-    localStorage.setItem(SHEETS_URL_KEY, SHEETS_URL_DEFAULT);
-  }
+  localStorage.setItem(SHEETS_URL_KEY, SHEETS_URL_DEFAULT);
   const saved = localStorage.getItem(SHEETS_URL_KEY) || SHEETS_URL_DEFAULT;
   const inp = document.getElementById('sheets-url-input');
   if (inp) {
