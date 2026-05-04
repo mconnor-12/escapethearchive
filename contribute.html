@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribute a Source to Escape the Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1208;
+    --ink2: #3d2f1a;
+    --paper: #f5f0e8;
+    --paper2: #ede5d4;
+    --paper3: #e0d5c0;
+    --rust: #8b3a2a;
+    --rust2: #c0532e;
+    --gold: #b8962a;
+    --gold2: #d4ad3a;
+    --sepia: #6b5230;
+    --sepia2: #8b6f47;
+    --teal: #2a5f5c;
+    --teal2: #3a7a76;
+    --cream: #faf7f0;
+    --error: #8b1a1a;
+    --success: #2a5f3a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23f5f0e8'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23e8e0ce' opacity='0.4'/%3E%3C/svg%3E");
+  }
+
+  /* NAV */
+  nav {
+    background: var(--ink);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--rust);
+  }
+  .nav-logo { font-family: 'Playfair Display', serif; color: var(--paper); font-size: 1.1rem; padding: 1rem 0; text-decoration: none; }
+  .nav-logo span { color: var(--gold2); }
+  .nav-links { display: flex; gap: 0; list-style: none; }
+  .nav-links a {
+    color: var(--paper2); text-decoration: none; padding: 1rem 1.1rem;
+    font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase;
+    display: block; transition: color 0.2s, background 0.2s; font-weight: 500;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--gold2); background: rgba(255,255,255,0.05); }
+
+  /* HERO */
+  .hero {
+    background: var(--teal);
+    color: var(--paper);
+    padding: 4rem 2rem 3.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      45deg, transparent, transparent 30px,
+      rgba(255,255,255,0.03) 30px, rgba(255,255,255,0.03) 31px
+    );
+  }
+  .hero-eyebrow { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold2); margin-bottom: 1rem; position: relative; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.2; position: relative; margin-bottom: 1rem; }
+  .hero h1 em { font-style: italic; color: var(--gold2); }
+  .hero-sub { font-size: 0.98rem; color: rgba(245,240,232,0.8); max-width: 560px; margin: 0 auto; line-height: 1.7; position: relative; }
+
+  /* LAYOUT */
+  .page-wrap { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+
+  /* INTRO STRIP */
+  .intro-strip {
+    background: var(--cream);
+    border-bottom: 1px solid var(--paper3);
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  @media (max-width: 600px) { .intro-strip { grid-template-columns: 1fr; } }
+  .intro-strip .strip-item h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--teal); font-weight: 600; margin-bottom: 0.3rem; font-family: 'DM Mono', monospace; }
+  .intro-strip .strip-item p { font-size: 0.84rem; color: var(--ink2); line-height: 1.55; }
+
+  /* SOURCE TYPES */
+  .source-types {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.6rem;
+    margin: 1.4rem 0 2rem;
+  }
+  .source-type-btn {
+    border: 2px solid var(--paper3);
+    background: var(--cream);
+    padding: 0.8rem 0.6rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .source-type-btn:hover { border-color: var(--teal); }
+  .source-type-btn.selected { border-color: var(--teal); background: var(--teal); color: white; }
+  .source-type-btn .st-icon { font-size: 1.4rem; display: block; margin-bottom: 0.3rem; }
+  .source-type-btn .st-label { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  /* FORM SECTIONS */
+  .form-section {
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--paper3);
+  }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sepia2);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--paper3); }
+  .form-section h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.6rem; }
+  .form-section > p { font-size: 0.92rem; color: var(--ink2); line-height: 1.7; margin-bottom: 1.4rem; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 560px) { .form-row { grid-template-columns: 1fr; } }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 680px) { .form-row-3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 440px) { .form-row-3 { grid-template-columns: 1fr; } }
+
+  .form-group { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+  .form-group label {
+    font-size: 0.73rem; text-transform: uppercase; letter-spacing: 0.1em;
+    font-weight: 600; color: var(--sepia); font-family: 'DM Mono', monospace;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .form-group label .req { color: var(--rust2); }
+  .form-group label .opt { color: var(--sepia2); font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 0.68rem; }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--paper3);
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    border-radius: 0;
+    -webkit-appearance: none;
+    width: 100%;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--teal2);
+    box-shadow: 0 0 0 2px rgba(42,95,92,0.12);
+  }
+  .form-group input.error { border-color: var(--error); }
+  .form-group textarea { min-height: 100px; resize: vertical; }
+  .field-hint { font-size: 0.75rem; color: var(--sepia2); font-family: 'DM Mono', monospace; margin-top: -0.5rem; margin-bottom: 0.5rem; }
+
+  /* CHECKBOX GROUP */
+  .checkbox-group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .checkbox-label {
+    display: flex; align-items: flex-start; gap: 0.6rem;
+    cursor: pointer; font-size: 0.9rem; color: var(--ink2); line-height: 1.4;
+  }
+  .checkbox-label input[type="checkbox"] { margin-top: 2px; accent-color: var(--teal); flex-shrink: 0; }
+
+  /* TEMPORAL TAGS */
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+  .tag-btn {
+    border: 1px solid var(--paper3);
+    background: var(--cream);
+    padding: 0.35rem 0.8rem;
+    font-size: 0.78rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+    color: var(--ink2);
+  }
+  .tag-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .tag-btn.selected { border-color: var(--teal); background: var(--teal); color: white; }
+
+  /* SUBMIT */
+  .submit-section { padding: 2.5rem 0; }
+  .submit-section .consent-box {
+    background: var(--cream);
+    border: 1px solid var(--paper3);
+    border-left: 4px solid var(--teal);
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--ink2);
+  }
+  .btn-submit {
+    background: var(--teal);
+    color: white;
+    border: none;
+    padding: 1rem 3rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .btn-submit:hover { background: var(--teal2); }
+  .btn-submit:disabled { background: var(--sepia2); cursor: not-allowed; }
+  .submit-note { font-size: 0.78rem; color: var(--sepia2); margin-top: 0.8rem; font-family: 'DM Mono', monospace; }
+
+  /* SUCCESS STATE */
+  #success-panel {
+    display: none;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 3rem 2.5rem;
+    text-align: center;
+    margin: 2rem 0;
+  }
+  #success-panel h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--gold2); margin-bottom: 1rem; }
+  #success-panel p { color: var(--paper3); font-size: 0.95rem; line-height: 1.7; margin-bottom: 0.5rem; }
+  .btn-another {
+    background: transparent;
+    color: var(--gold2);
+    border: 1px solid var(--gold2);
+    padding: 0.7rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: all 0.2s;
+  }
+  .btn-another:hover { background: var(--gold2); color: var(--ink); }
+
+  /* STATUS */
+  .status-bar {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    font-family: 'DM Mono', monospace;
+    display: none;
+    margin-top: 0.5rem;
+  }
+  .status-bar.sending { background: var(--paper2); color: var(--sepia); display: flex; align-items: center; gap: 0.5rem; }
+  .status-bar.error { background: #fdf0ee; color: var(--error); display: block; border-left: 3px solid var(--error); }
+
+  /* PROGRESS STEPS */
+  .progress-steps {
+    display: flex;
+    gap: 0;
+    margin: 2rem 0 0;
+    background: var(--cream);
+    border: 1px solid var(--paper3);
+    overflow: hidden;
+  }
+  .step {
+    flex: 1;
+    padding: 0.6rem 0.8rem;
+    text-align: center;
+    font-size: 0.72rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sepia2);
+    border-right: 1px solid var(--paper3);
+    position: relative;
+    transition: all 0.3s;
+  }
+  .step:last-child { border-right: none; }
+  .step.active { background: var(--teal); color: white; }
+  .step.done { background: var(--paper3); color: var(--sepia); }
+
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--ink2);
+    cursor: pointer;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--paper3);
+    background: var(--cream);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .checkbox-label:hover { background: var(--paper2); border-color: var(--teal); }
+  .checkbox-label input[type="checkbox"] {
+    margin-top: 2px;
+    accent-color: var(--teal);
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  .checkbox-label span {
+    flex: 1;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .checkbox-label input:checked ~ span { color: var(--teal); }
+  .checkbox-label:has(input:checked) { background: rgba(42,95,92,0.08); border-color: var(--teal); }
+
+  footer { background: var(--ink); color: var(--paper3); text-align: center; padding: 2rem; font-size: 0.8rem; font-family: 'DM Mono', monospace; letter-spacing: 0.06em; border-top: 3px solid var(--rust); }
+  footer a { color: var(--gold2); text-decoration: none; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="memory.html" class="nav-logo">Escape the <span>Archive</span></a>
+  <ul class="nav-links">
+    <li><a href="memory.html">Play</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contribute.html" class="active">Contribute</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <p class="hero-eyebrow">The Living Archive</p>
+  <h1>Contribute a Source<br>to the <em>Archive</em></h1>
+  <p class="hero-sub">Archives are made, not found. Every document, photograph, recording, or account you submit becomes part of a growing collection, available to students and educators exploring memory, evidence, and the past.</p>
+</header>
+
+<!-- INTRO STRIP -->
+<div class="intro-strip">
+  <div class="strip-item">
+    <h4>What can I submit?</h4>
+    <p>Photographs, documents, recordings, oral histories, objects, maps, or any source that captures a moment, past or present.</p>
+  </div>
+  <div class="strip-item">
+    <h4>Who can contribute?</h4>
+    <p>Students, educators, family members, community historians, researchers, or anyone with a source worth preserving.</p>
+  </div>
+  <div class="strip-item">
+    <h4>What happens next?</h4>
+    <p>Submissions are reviewed before entering the archive. You'll be credited according to your attribution preferences.</p>
+  </div>
+</div>
+
+<main class="page-wrap">
+  <div id="success-panel">
+    <h2>Source received.</h2>
+    <p>Thank you for contributing to the archive. Your submission will be reviewed and, if accepted, will appear in the collection with your attribution preferences honored.</p>
+    <p style="margin-top:0.5rem; font-size:0.82rem; color:var(--sepia2); font-family:'DM Mono',monospace;">Every archive is an act of curation. We're grateful for yours.</p>
+    <button class="btn-another" onclick="resetForm()">Submit another source</button>
+  </div>
+
+  <div id="form-wrap">
+    <!-- SYNC STATUS -->
+    <div id="contrib-sync-bar" style="display:none;background:rgba(42,95,92,0.1);border:1px solid rgba(42,95,92,0.3);border-left:3px solid var(--teal);padding:0.7rem 1rem;margin-bottom:1.5rem;font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.06em;color:var(--teal);">
+      <span id="contrib-sync-text">Archive ledger connected. Submissions will sync automatically.</span>
+    </div>
+    <!-- PROGRESS -->
+    <div class="progress-steps">
+      <div class="step active" id="step1">1. Source Type</div>
+      <div class="step" id="step2">2. The Source</div>
+      <div class="step" id="step3">3. Attribution</div>
+      <div class="step" id="step4">4. Context</div>
+      <div class="step" id="step5">5. Submit</div>
+    </div>
+
+    <!-- SECTION 1: SOURCE TYPE -->
+    <div class="form-section" id="section-type">
+      <p class="section-label">Step 1</p>
+      <h2>What kind of source is this?</h2>
+      <p>Select the primary format. This helps us contextualize and organize the submission within the archive.</p>
+
+      <div class="source-types">
+        <div class="source-type-btn" onclick="selectSourceType(this, 'Photograph / Image')">
+          <span class="st-icon">🖼️</span>
+          <span class="st-label">Photograph</span>
+        </div>
+        <div class="source-type-btn" onclick="selectSourceType(this, 'Written Document')">
+          <span class="st-icon">📄</span>
+          <span class="st-label">Document</span>
+        </div>
+        <div class="source-type-btn" onclick="selectSourceType(this, 'Audio / Recording')">
+          <span class="st-icon">🎙️</span>
+          <span class="st-label">Audio</span>
+        </div>
+        <div class="source-type-btn" onclick="selectSourceType(this, 'Video / Film')">
+          <span class="st-icon">🎞️</span>
+          <span class="st-label">Video</span>
+        </div>
+        <div class="source-type-btn" onclick="selectSourceType(this, 'Oral History / Testimony')">
+          <span class="st-icon">💬</span>
+          <span class="st-label">Oral History</span>
+        </div>
+        <div class="source-type-btn" onclick="selectSourceType(this, 'Map / Spatial')">
+          <span class="st-icon">🗺️</span>
+          <span class="st-label">Map</span>
+        </div>
+        <div class="source-type-btn" onclick="selectSourceType(this, 'Object / Artifact')">
+          <span class="st-icon">🏺</span>
+          <span class="st-label">Object</span>
+        </div>
+        <div class="source-type-btn" onclick="selectSourceType(this, 'Other')">
+          <span class="st-icon">📦</span>
+          <span class="st-label">Other</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="source-type-other">If Other, please specify <span class="opt">(optional)</span></label>
+        <input type="text" id="source-type-other" placeholder="e.g. Quilt, recipe, land deed, architectural plan…">
+      </div>
+    </div>
+
+    <!-- SECTION 2: THE SOURCE -->
+    <div class="form-section" id="section-source">
+      <p class="section-label">Step 2</p>
+      <h2>Tell us about the source</h2>
+      <p>Provide as much information as you can. Uncertain details are fine, just note them as such. Gaps in the record are part of the archive too.</p>
+
+      <div class="form-group">
+        <label for="source-title">Source Title or Description <span class="req">*</span></label>
+        <input type="text" id="source-title" placeholder="e.g. Portrait of grandmother, 1952, or, Letter to draft board, Camden, NJ, 1970">
+        <p class="field-hint">Give it a working title if it doesn't have one. Be descriptive.</p>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="source-date">Date of Origin <span class="opt">(approx. ok)</span></label>
+          <input type="text" id="source-date" placeholder="e.g. 1967, circa 1940s, June 12 2019">
+        </div>
+        <div class="form-group">
+          <label for="source-location">Place of Origin <span class="opt">(approx. ok)</span></label>
+          <input type="text" id="source-location" placeholder="e.g. Bronx NY, rural Oaxaca, unknown">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="source-description">Description / Transcription <span class="req">*</span></label>
+        <textarea id="source-description" style="min-height:140px;" placeholder="Describe what the source shows, contains, or records. If it's a document, transcribe relevant portions. If it's a photograph, describe what's depicted. Note anything uncertain."></textarea>
+        <p class="field-hint">If the source is in another language, include the original and a translation if possible.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="source-url">Link to Source <span class="opt">(if available online)</span></label>
+        <input type="url" id="source-url" placeholder="https://…">
+        <p class="field-hint">A URL to a digitized version, archival database entry, or file hosting link.</p>
+      </div>
+
+      <div class="form-group">
+        <label>Temporal Context | When does this source connect to? <span class="opt">(select all that apply)</span></label>
+        <div class="tag-grid" id="temporal-tags">
+          <button class="tag-btn" onclick="toggleTag(this)">Capturing the Present Moment</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Living Memory (within 60 years)</button>
+          <button class="tag-btn" onclick="toggleTag(this)">20th Century</button>
+          <button class="tag-btn" onclick="toggleTag(this)">19th Century</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Earlier than 19th Century</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Unknown / Undated</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: ATTRIBUTION -->
+    <div class="form-section" id="section-attribution">
+      <p class="section-label">Step 3</p>
+      <h2>Attribution &amp; Credit</h2>
+      <p>How this source is credited matters. Please fill in all fields that apply so we can honor your contribution correctly so future users can cite the source appropriately.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="contrib-name">Your Name <span class="req">*</span></label>
+          <input type="text" id="contrib-name" placeholder="First and last name">
+        </div>
+        <div class="form-group">
+          <label for="contrib-email">Your Email <span class="req">*</span></label>
+          <input type="email" id="contrib-email" placeholder="your@email.com">
+          <p class="field-hint">Not displayed publicly. Used only for correspondence about this submission.</p>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="contrib-role">Your Role</label>
+          <select id="contrib-role">
+            <option value="">Select…</option>
+            <option>Student</option>
+            <option>Teacher / Educator</option>
+            <option>Researcher / Academic</option>
+            <option>Family Member / Descendant</option>
+            <option>Community Member</option>
+            <option>Archivist / Librarian</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="contrib-institution">Affiliated Institution <span class="opt">(optional)</span></label>
+          <input type="text" id="contrib-institution" placeholder="e.g. DREAM Charter School, Columbia University">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Display Credit Preference <span class="req">*</span></label>
+        <p class="field-hint" style="margin-top:0;">How should you be credited in the public archive?</p>
+        <select id="credit-pref">
+          <option value="">Select your preference…</option>
+          <option value="full-name">Full name (e.g. "Contributed by Jane Smith")</option>
+          <option value="first-only">First name only (e.g. "Contributed by Jane")</option>
+          <option value="role-affil">Role and institution (e.g. "Student contributor, DREAM Charter School")</option>
+          <option value="anonymous">Anonymous | do not display my name</option>
+          <option value="contact-me">Contact me before publishing, I want to discuss credit</option>
+        </select>
+      </div>
+
+      <div style="border: 1px solid var(--paper3); padding: 1.2rem 1.4rem; background: var(--cream); margin-bottom:1rem;">
+        <p class="section-label" style="margin-bottom:0.8rem;">Original Creator / Creator of Record</p>
+        <p style="font-size:0.85rem; color:var(--ink2); margin-bottom:1rem; line-height:1.65;">
+          If you are not the original creator of this source (e.g. you are submitting a family photograph taken by someone else, or a document authored by another person), please provide that information here so the archive can attribute it correctly.
+        </p>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="orig-creator">Original Creator's Name <span class="opt">(if known)</span></label>
+            <input type="text" id="orig-creator" placeholder="e.g. Maria Dominguez, Unknown, attributed to…">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="orig-creator-role">Creator's Role or Relationship</label>
+            <input type="text" id="orig-creator-role" placeholder="e.g. Photographer, Author, My grandmother">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="current-holder">Current Location / Holder of Original</label>
+        <input type="text" id="current-holder" placeholder="e.g. Family collection, Schomburg Center, author's possession">
+      </div>
+
+      <div class="form-group">
+        <label>Usage Rights <span class="req">*</span></label>
+        <select id="usage-rights">
+          <option value="">Select…</option>
+          <option value="cc-by">Creative Commons, free to use with attribution</option>
+          <option value="educational">Educational use only, not for commercial use</option>
+          <option value="archive-only">Archive display only, do not redistribute</option>
+          <option value="restricted">Restricted, contact me before any use</option>
+          <option value="public-domain">Public domain</option>
+          <option value="unknown">Unknown / I'm not sure</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- SECTION 4: CONTEXT -->
+    <div class="form-section" id="section-context">
+      <p class="section-label">Step 4</p>
+      <h2>Archival Context</h2>
+      <p>Help us place this source in relation to the themes of the archive. These fields shape how students and educators encounter the source.</p>
+
+      <div class="form-group">
+        <label>Thematic Tags <span class="opt">(select all that apply)</span></label>
+        <div class="tag-grid" id="thematic-tags">
+          <button class="tag-btn" onclick="toggleTag(this)">Memory &amp; Forgetting</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Family History</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Immigration &amp; Migration</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Labor &amp; Economy</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Race &amp; Identity</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Gender</button>
+          <button class="tag-btn" onclick="toggleTag(this)">War &amp; Conflict</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Community &amp; Place</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Protest &amp; Resistance</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Institutional Power</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Photography &amp; Visual Culture</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Oral Tradition</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Silences &amp; Absences</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Environmental History</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="archival-note">Archival Note: Why does this source matter?</label>
+        <textarea id="archival-note" placeholder="Why did you choose to contribute this source? What does it reveal, complicate, or preserve? What questions does it raise? Gaps are welcome. What do we not know about this source?"></textarea>
+        <p class="field-hint">This note may appear alongside the source in the archive to help contextualize it for future readers.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="related-sources">Related Sources or Archives <span class="opt">(optional)</span></label>
+        <input type="text" id="related-sources" placeholder="e.g. Relates to the 1970 Camden 28 trial; see also New Jersey State Archives…">
+      </div>
+
+      <div class="form-group">
+        <label for="suggested-grade">Suggested Audience / Grade Level <span class="opt">(optional)</span></label>
+        <select id="suggested-grade">
+          <option value="">Not specified</option>
+          <option>Elementary (K through 5)</option>
+          <option>Middle School (6 through 8)</option>
+          <option>High School (9 through 12)</option>
+          <option>Undergraduate</option>
+          <option>Graduate / Research</option>
+          <option>General Audiences</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Content Notes <span class="opt">(optional | check all that apply)</span></label>
+        <div class="checkbox-group">
+          <label class="checkbox-label"><input type="checkbox" name="content-note" value="trauma"><span>Contains references to trauma, violence, or difficult historical events</span></label>
+          <label class="checkbox-label"><input type="checkbox" name="content-note" value="identity"><span>Involves sensitive identity information (race, ethnicity, immigration status, etc.)</span></label>
+          <label class="checkbox-label"><input type="checkbox" name="content-note" value="deceased"><span>Depicts or references deceased individuals</span></label>
+          <label class="checkbox-label"><input type="checkbox" name="content-note" value="indigenous"><span>Contains Indigenous cultural material | may require additional community consultation</span></label>
+          <label class="checkbox-label"><input type="checkbox" name="content-note" value="explicit"><span>Contains explicit language or imagery</span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMIT SECTION -->
+    <div class="submit-section">
+      <p class="section-label">Step 5</p>
+
+      <div class="consent-box">
+        <strong>Before you submit:</strong> By contributing to this archive, you confirm that you have the right to share this source in the context described above, that you have honored the attribution and usage preferences of any original creator to the best of your knowledge, and that you understand your submission will be reviewed before inclusion. You retain all rights to your original contributions.
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label" style="align-items:flex-start; gap:0.8rem; font-size:0.9rem; color:var(--ink);">
+          <input type="checkbox" id="consent-check" style="margin-top:3px; accent-color:var(--teal); flex-shrink:0; width:16px; height:16px;">
+          <span>I confirm the above and consent to this submission being reviewed for inclusion in the Escape the Archive public collection.</span>
+        </label>
+      </div>
+
+      <button class="btn-submit" id="submit-btn" onclick="submitContribution()">
+        <span>Submit to Archive</span>
+      </button>
+
+      <div class="status-bar" id="status-bar"></div>
+      <p class="submit-note">Submissions are reviewed within 5–10 business days. You may be contacted at the email provided.</p>
+    </div>
+
+  </div><!-- /form-wrap -->
+</main>
+
+<footer>
+  <p>Escape the Archive &nbsp;·&nbsp; A Living Project &nbsp;·&nbsp; <a href="about.html">About</a> &nbsp;·&nbsp; <a href="memory.html">Play</a></p>
+</footer>
+
+<script>
+  // Load sheets URL from game and show sync status
+  // already replaced/macros/s/AKfycbx_hE36G5zn8evEoIge02aR-5q5fnPQKiqtay_7v4DkgXud3DJqpbhc7J3XQ9WTh2Y/exec';
+  window.addEventListener('DOMContentLoaded', () => {
+    if (!localStorage.getItem('sheetsUrl')) {
+      localStorage.setItem('sheetsUrl', SHEETS_URL_DEFAULT);
+    }
+    const url = localStorage.getItem('sheetsUrl') || SHEETS_URL_DEFAULT;
+    const bar = document.getElementById('contrib-sync-bar');
+    if (url && bar) {
+      bar.style.display = 'block';
+      document.getElementById('contrib-sync-text').textContent = 'Archive ledger connected. Your submission will sync to the educator spreadsheet.';
+    }
+  });
+
+  let selectedSourceType = '';
+  let selectedTemporalTags = [];
+  let selectedThematicTags = [];
+
+  // ── SOURCE TYPE ──
+  function selectSourceType(el, type) {
+    document.querySelectorAll('.source-type-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedSourceType = type;
+    updateProgress();
+  }
+
+  // ── TAGS ──
+  function toggleTag(el) {
+    el.classList.toggle('selected');
+    // rebuild selected arrays
+    selectedTemporalTags = Array.from(document.querySelectorAll('#temporal-tags .tag-btn.selected')).map(b => b.textContent.trim());
+    selectedThematicTags = Array.from(document.querySelectorAll('#thematic-tags .tag-btn.selected')).map(b => b.textContent.trim());
+    updateProgress();
+  }
+
+  // ── PROGRESS ──
+  function updateProgress() {
+    const filled = [
+      selectedSourceType,
+      document.getElementById('source-title').value,
+      document.getElementById('source-description').value,
+      document.getElementById('contrib-name').value,
+      document.getElementById('contrib-email').value,
+    ];
+    const steps = document.querySelectorAll('.step');
+    let done = 0;
+    if (selectedSourceType) done = 1;
+    if (document.getElementById('source-title').value) done = 2;
+    if (document.getElementById('contrib-name').value) done = 3;
+    if (document.getElementById('archival-note').value) done = 4;
+    steps.forEach((s, i) => {
+      s.classList.remove('active', 'done');
+      if (i < done) s.classList.add('done');
+      if (i === done) s.classList.add('active');
+    });
+  }
+
+  // Listen for text input changes
+  ['source-title','source-description','contrib-name','contrib-email','archival-note'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateProgress);
+  });
+
+  // ── SUBMIT ──
+  async function submitContribution() {
+    const name = document.getElementById('contrib-name').value.trim();
+    const email = document.getElementById('contrib-email').value.trim();
+    const title = document.getElementById('source-title').value.trim();
+    const description = document.getElementById('source-description').value.trim();
+    const creditPref = document.getElementById('credit-pref').value;
+    const usageRights = document.getElementById('usage-rights').value;
+    const consent = document.getElementById('consent-check').checked;
+
+    // Validate required
+    const errors = [];
+    if (!selectedSourceType) errors.push('Please select a source type.');
+    if (!title) errors.push('Please provide a source title or description.');
+    if (!description) errors.push('Please provide a description or transcription.');
+    if (!name) errors.push('Please provide your name.');
+    if (!email) errors.push('Please provide your email address.');
+    if (!creditPref) errors.push('Please select a credit preference.');
+    if (!usageRights) errors.push('Please select usage rights.');
+    if (!consent) errors.push('Please confirm consent before submitting.');
+
+    if (errors.length) {
+      alert('Please fix the following:\n\n• ' + errors.join('\n• '));
+      return;
+    }
+
+    // Build content notes
+    const contentNotes = Array.from(document.querySelectorAll('input[name="content-note"]:checked')).map(el => el.value);
+
+    const payload = {
+      action: 'contribute',
+      submitted_at: new Date().toISOString(),
+      source_type: selectedSourceType,
+      source_type_other: document.getElementById('source-type-other').value.trim(),
+      source_title: title,
+      source_date: document.getElementById('source-date').value.trim(),
+      source_location: document.getElementById('source-location').value.trim(),
+      source_description: description,
+      source_url: document.getElementById('source-url').value.trim(),
+      temporal_tags: selectedTemporalTags.join('; '),
+      thematic_tags: selectedThematicTags.join('; '),
+      contributor_name: name,
+      contributor_email: email,
+      contributor_role: document.getElementById('contrib-role').value,
+      contributor_institution: document.getElementById('contrib-institution').value.trim(),
+      credit_preference: creditPref,
+      original_creator: document.getElementById('orig-creator').value.trim(),
+      original_creator_role: document.getElementById('orig-creator-role').value.trim(),
+      current_holder: document.getElementById('current-holder').value.trim(),
+      usage_rights: usageRights,
+      archival_note: document.getElementById('archival-note').value.trim(),
+      related_sources: document.getElementById('related-sources').value.trim(),
+      suggested_grade: document.getElementById('suggested-grade').value,
+      content_notes: contentNotes.join('; '),
+      review_status: 'pending'
+    };
+
+    const btn = document.getElementById('submit-btn');
+    const statusBar = document.getElementById('status-bar');
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div><span>Submitting…</span>';
+    statusBar.className = 'status-bar sending';
+    statusBar.textContent = '⏳ Sending to archive ledger…';
+
+    const sheetsUrl = localStorage.getItem('sheetsUrl') || localStorage.getItem('eta_sheets_url') || '';
+
+    try {
+      if (sheetsUrl) {
+        await fetch(sheetsUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          mode: 'no-cors'
+        });
+      } else {
+        // Store locally if no sheets URL
+        const saved = JSON.parse(localStorage.getItem('eta_contributions') || '[]');
+        saved.push(payload);
+        localStorage.setItem('eta_contributions', JSON.stringify(saved));
+        console.log('[Escape the Archive] Contribution saved locally (no Sheets URL configured):', payload);
+      }
+
+      // Show success
+      document.getElementById('form-wrap').style.display = 'none';
+      document.getElementById('success-panel').style.display = 'block';
+      document.getElementById('success-panel').scrollIntoView({ behavior: 'smooth' });
+
+    } catch (e) {
+      console.warn('Submission error:', e);
+      statusBar.className = 'status-bar error';
+      statusBar.textContent = '✗ Submission error. Please try again or contact the archive directly.';
+      btn.disabled = false;
+      btn.innerHTML = '<span>Submit to Archive</span>';
+    }
+  }
+
+  // ── RESET ──
+  function resetForm() {
+    document.getElementById('form-wrap').style.display = 'block';
+    document.getElementById('success-panel').style.display = 'none';
+    document.querySelectorAll('input[type="text"], input[type="email"], input[type="url"], textarea').forEach(el => el.value = '');
+    document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+    document.querySelectorAll('.source-type-btn, .tag-btn').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+    selectedSourceType = '';
+    selectedTemporalTags = [];
+    selectedThematicTags = [];
+    document.getElementById('status-bar').className = 'status-bar';
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('submit-btn').innerHTML = '<span>Submit to Archive</span>';
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
