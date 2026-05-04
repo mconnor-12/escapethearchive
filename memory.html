@@ -1493,6 +1493,7 @@ function beginGame() {
   document.getElementById('landing').style.display = 'none';
   document.getElementById('game-shell').style.display = 'block';
   // Sync to Google Sheet the moment the student clicks Enter the Archive
+  if (typeof startLoadingBar === 'function') startLoadingBar();
   if (typeof logArchiveEntry === 'function') logArchiveEntry();
 }
 function openPanel(id) {

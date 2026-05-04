@@ -99,7 +99,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (setup) setup.style.display = 'none';
   }
 
-  // Loading bar animation
+  // Loading bar runs after beginGame()
   const bar = document.getElementById('loading-bar');
   let w = 0;
   const iv = setInterval(() => {
@@ -896,3 +896,21 @@ const HINTS = {
   'hint-r3': 'Pick one source from the list and ask: where did this source get its information? Now ask that again for the next one.',
   'hint-r4': 'Set aside the numbers and labels. If you stripped away the ranking and share counts, would these sources feel different?',
 };
+
+function startLoadingBar() {
+  const bar = document.getElementById('loading-bar');
+  let w = 0;
+  const iv = setInterval(() => {
+    w += Math.random() * 18 + 4;
+    if (w >= 100) { w = 100; clearInterval(iv); }
+    if (bar) bar.style.width = w + '%';
+    if (w >= 100) {
+      setTimeout(() => {
+        const ls = document.getElementById('loading-screen');
+        const rs = document.getElementById('role-screen');
+        if (ls) ls.style.display = 'none';
+        if (rs) rs.style.display = 'block';
+      }, 350);
+    }
+  }, 80);
+}
