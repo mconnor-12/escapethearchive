@@ -178,6 +178,7 @@ body { font-family: var(--font-sans); line-height: 1.6; }
   max-width: 900px;
   margin: 0 auto;
 }
+.role-q { color: var(--text-dim); font-size: 0.9rem; font-style: italic; margin-top: 0.5rem; display: block; }
 .role-card {
   background: var(--bg-card);
   border: 1px solid var(--border-dim);
