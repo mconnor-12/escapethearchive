@@ -105,7 +105,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
   initDnD();
-  initTouchDnD();
   initHotspots();
   initTooltips();
   shuffleDndChips();
@@ -213,9 +212,6 @@ function setRolePrologueText(role) {
 // ── ROOM NAVIGATION ────────────────────────────────────────────
 function goToRoom(n) {
   S.room = n;
-  // Clear any active failsafe timers for previous room
-  if (window._roomFailsafeTimers) { Object.values(window._roomFailsafeTimers).forEach(t => clearTimeout(t)); }
-  if (window._failsafeState) { Object.keys(_failsafeState).forEach(k => clearTimeout((_failsafeState[k]||{}).timer)); }
   document.querySelectorAll('.room-panel').forEach(p => p.classList.remove('visible'));
   const panel = document.getElementById('room-' + n);
   if (panel) {
@@ -254,51 +250,6 @@ function goToRoom(n) {
   logEvent('room_enter', { room: n });
   if (n > 0) scoreRoomComplete(n - 1);
 
-  // Initialize failsafe for each room with specific gates
-  if (n === 0) {
-    // Prologue failsafe: after 4 min or 3 failed save attempts, show sticky proceed
-    const _prologueTimer = setTimeout(() => {
-      // Force-complete prologue if still stuck after 4 minutes
-      S.r0.hotspot1 = true; S.r0.hotspot2 = true; S.r0.hotspot3 = true;
-      S.r0.annotationsSaved = true;
-      const procEl = document.getElementById('prologue-proceed');
-      if (procEl) procEl.hidden = false;
-      setStickyProceed('Continue to Room I', () => goToRoom(1));
-      logEvent('failsafe_triggered', { room: 0, reason: 'timeout' });
-    }, 4 * 60 * 1000);
-    window._roomFailsafeTimers = window._roomFailsafeTimers || {};
-    window._roomFailsafeTimers[0] = _prologueTimer;
-  } else if (n === 1) {
-    initFailsafe(1, 'r1-proceed', 'Continue to Room II', 2, null);
-  } else if (n === 2) {
-    initFailsafe(2, 'r2-proceed', 'Continue to Room III', 3, () => {
-      const lz = document.getElementById('r2-limitation-zone');
-      if (lz) lz.removeAttribute('hidden');
-    });
-  } else if (n === 3) {
-    initFailsafe(3, 'r3-proceed', 'Continue to Room IV', 4, () => {
-      const jz = document.getElementById('r3-judgment-zone');
-      if (jz) jz.removeAttribute('hidden');
-    });
-  } else if (n === 4) {
-    initFailsafe(4, 'r4-proceed', 'Continue to Room V', 5, () => {
-      const rz = document.getElementById('r4-reflect-zone');
-      if (rz) rz.removeAttribute('hidden');
-    });
-  } else if (n === 5) {
-    // Room V: after 4 min, show escape-complete regardless
-    const _r5Timer = setTimeout(() => {
-      const ec = document.getElementById('escape-complete');
-      if (ec) { ec.hidden = false; ec.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-      setStickyProceed('View your archive report', () => {
-        const ec2 = document.getElementById('escape-complete');
-        if (ec2) ec2.scrollIntoView({ behavior: 'smooth' });
-      });
-      logEvent('failsafe_triggered', { room: 5, reason: 'timeout' });
-    }, 4 * 60 * 1000);
-    window._roomFailsafeTimers = window._roomFailsafeTimers || {};
-    window._roomFailsafeTimers[5] = _r5Timer;
-  }
 }
 
 function applyRoleView() {
@@ -343,9 +294,9 @@ function saveAnnotations() {
   const a1 = document.getElementById('annot-1')?.value.trim();
   const a2 = document.getElementById('annot-2')?.value.trim();
   const a3 = document.getElementById('annot-3')?.value.trim();
-  if (!a1) { showFeedback('fb-annot','warn','Answer question 1 first.'); document.getElementById('annot-1')?.focus(); activateHint('hint-annot'); window._prologueFailAttempts=(window._prologueFailAttempts||0)+1; if(window._prologueFailAttempts>=3){setStickyProceed('Continue to Room I',()=>goToRoom(1));logEvent('failsafe_triggered',{room:0,reason:'attempts'});} return; }
-  if (!a2) { showFeedback('fb-annot','warn','Answer question 2 first.'); document.getElementById('annot-2')?.focus(); activateHint('hint-annot'); window._prologueFailAttempts=(window._prologueFailAttempts||0)+1; if(window._prologueFailAttempts>=3){setStickyProceed('Continue to Room I',()=>goToRoom(1));logEvent('failsafe_triggered',{room:0,reason:'attempts'});} return; }
-  if (!a3) { showFeedback('fb-annot','warn','Answer question 3 first.'); document.getElementById('annot-3')?.focus(); activateHint('hint-annot'); window._prologueFailAttempts=(window._prologueFailAttempts||0)+1; if(window._prologueFailAttempts>=3){setStickyProceed('Continue to Room I',()=>goToRoom(1));logEvent('failsafe_triggered',{room:0,reason:'attempts'});} return; }
+  if (!a1) { showFeedback('fb-annot','warn','Answer question 1 first.'); document.getElementById('annot-1')?.focus(); activateHint('hint-annot'); return; }
+  if (!a2) { showFeedback('fb-annot','warn','Answer question 2 first.'); document.getElementById('annot-2')?.focus(); activateHint('hint-annot'); return; }
+  if (!a3) { showFeedback('fb-annot','warn','Answer question 3 first.'); document.getElementById('annot-3')?.focus(); activateHint('hint-annot'); return; }
 
   S.r0.annotationsSaved = true;
   document.getElementById('annot-save-btn')?.setAttribute('disabled', true);
@@ -424,65 +375,6 @@ const EUPH_ANSWERS = {
 };
 
 
-// ── FAILSAFE SYSTEM ─────────────────────────────────────────────────────────
-// After 3 failed attempts or 4 minutes in a room, a quiet bypass appears.
-// It logs the skip, awards no points, and opens the proceed path.
-const _failsafeState = {};
-
-function initFailsafe(room, attemptCounterId, proceedId, proceedLabel, nextRoom, extraSetup) {
-  const key = 'room_' + room;
-  _failsafeState[key] = { attempts: 0, timer: null, shown: false };
-
-  // Start 4-minute timer
-  const _fsTimerRef = setTimeout(() => {
-    showFailsafe(room, proceedId, proceedLabel, nextRoom, extraSetup, 'timeout');
-  }, 4 * 60 * 1000);
-  _failsafeState[key].timer = _fsTimerRef;
-  window._roomFailsafeTimers = window._roomFailsafeTimers || {};
-  window._roomFailsafeTimers[room] = _fsTimerRef;
-}
-
-function recordFailsafeAttempt(room, proceedId, proceedLabel, nextRoom, extraSetup) {
-  const key = 'room_' + room;
-  if (!_failsafeState[key]) return;
-  _failsafeState[key].attempts = (_failsafeState[key].attempts || 0) + 1;
-  if (_failsafeState[key].attempts >= 3 && !_failsafeState[key].shown) {
-    showFailsafe(room, proceedId, proceedLabel, nextRoom, extraSetup, 'attempts');
-  }
-}
-
-function showFailsafe(room, proceedId, proceedLabel, nextRoom, extraSetup, reason) {
-  const key = 'room_' + room;
-  if (_failsafeState[key] && _failsafeState[key].shown) return;
-  if (_failsafeState[key]) _failsafeState[key].shown = true;
-
-  // Run any extra setup needed (e.g. reveal a zone before proceeding)
-  if (typeof extraSetup === 'function') extraSetup();
-
-  // Reveal the proceed element
-  const proceedEl = document.getElementById(proceedId);
-  if (proceedEl) {
-    proceedEl.removeAttribute('hidden');
-    setTimeout(() => proceedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
-  }
-  setStickyProceed(proceedLabel, () => goToRoom(nextRoom));
-
-  // Show a quiet notice near the proceed button
-  const notice = document.createElement('p');
-  notice.style.cssText = 'font-family:var(--font-mono);font-size:0.62rem;color:rgba(220,200,160,0.35);margin-top:0.5rem;letter-spacing:0.06em;';
-  notice.textContent = 'Path forward unlocked. Your work so far has been saved.';
-  if (proceedEl) proceedEl.insertAdjacentElement('afterbegin', notice);
-
-  logEvent('failsafe_triggered', { room, reason });
-}
-
-function clearFailsafe(room) {
-  const key = 'room_' + room;
-  if (_failsafeState[key] && _failsafeState[key].timer) {
-    clearTimeout(_failsafeState[key].timer);
-  }
-}
-// ── END FAILSAFE SYSTEM ──────────────────────────────────────────────────────
 
 // ── SCORING ───────────────────────────────────────────────────────────────────
 const SCORE_VALUES = {
@@ -794,8 +686,7 @@ function submitLeadJudgment() {
   if (!judgment || judgment.length < 20) {
     showFeedback('fb-r1', 'warn', 'Write at least one full sentence. Which specific words in the record seem important to you?');
     activateHint('hint-r1');
-    recordFailsafeAttempt(1, 'r1-proceed', 'Continue to Room II', 2, null);
-    document.getElementById('lead-judgment')?.focus();
+      document.getElementById('lead-judgment')?.focus();
     return;
   }
   S.r1.claimSubmitted = true;
@@ -812,8 +703,7 @@ function buildLimitationClaimScaffold() {
   const claim = document.getElementById('limitation-claim')?.value.trim();
   if (!claim || claim.length < 15) {
     showFeedback('fb-r1-lim', 'warn', 'Articulate the limitation in at least one full sentence.');
-    recordFailsafeAttempt(1, 'r1-proceed', 'Continue to Room II', 2, null);
-    document.getElementById('limitation-claim')?.focus();
+      document.getElementById('limitation-claim')?.focus();
     return;
   }
   S.r1.claimSubmitted = true;
@@ -894,7 +784,6 @@ function submitEchoTrace() {
   if (!trace || trace.length < 15) {
     showFeedback('fb-r3', 'warn', 'Trace the full citation path before your verdict. Name the specific chain.');
     document.getElementById('r3-trace')?.focus();
-    recordFailsafeAttempt(3, 'r3-proceed', 'Continue to Room IV', 4, () => { const jz=document.getElementById('r3-judgment-zone'); if(jz) jz.removeAttribute('hidden'); });
     return;
   }
   S.r3.tracingDone = true;
@@ -970,8 +859,7 @@ function submitFeedReflection() {
   if (!ref || ref.length < 20) {
     showFeedback('fb-r4', 'warn', 'Reflect in at least two sentences. How did the ranking shape your judgment?');
     document.getElementById('r4-reflect')?.focus();
-    recordFailsafeAttempt(4, 'r4-proceed', 'Continue to Room V', 5, () => { const rz=document.getElementById('r4-reflect-zone'); if(rz) rz.removeAttribute('hidden'); });
-    return;
+      return;
   }
   S.r4.feedReflected = true;
   postToSheets({ action: 'room_response', room: 4, detail: { taskId: 'R4_REFLECT', taskLabel: 'Feed reflection', responseType: 'open_text', responseText: ref, standards: 'AS-4, AS-5', skillCategory: 'Argumentation' } });
@@ -2019,7 +1907,6 @@ function shuffleDndChips() {
 
 // ── R1 RESET ─────────────────────────────────────────────────────────────────
 function resetEuphLevel() {
-  recordFailsafeAttempt(1, 'r1-proceed', 'Continue to Room II', 2, null);
   // Clear DnD state
   Object.keys(_euphDndState).forEach(k => delete _euphDndState[k]);
   // Clear zones
@@ -2049,7 +1936,6 @@ function resetEuphLevel() {
 
 // ── R2 RESET ─────────────────────────────────────────────────────────────────
 function resetSourceLevel() {
-  recordFailsafeAttempt(2, 'r2-proceed', 'Continue to Room III', 3, () => { const lz=document.getElementById('r2-limitation-zone'); if(lz) lz.removeAttribute('hidden'); });
   Object.keys(_r2Tagged).forEach(k => delete _r2Tagged[k]);
   S.r2.sourcesTagged = 0;
   document.querySelectorAll('.sig-btn').forEach(b => {
@@ -2067,7 +1953,6 @@ function resetSourceLevel() {
 
 // ── R4 RESET ─────────────────────────────────────────────────────────────────
 function resetSignalLevel() {
-  recordFailsafeAttempt(4, 'r4-proceed', 'Continue to Room V', 5, () => { const rz=document.getElementById('r4-reflect-zone'); if(rz) rz.removeAttribute('hidden'); });
   Object.keys(_r4Rated).forEach(k => delete _r4Rated[k]);
   S.r4.signalsRated = 0;
   document.querySelectorAll('#room-4 .sig-btn').forEach(b => {

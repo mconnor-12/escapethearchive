@@ -3505,7 +3505,7 @@ async function sendContact() {
 /* ── SIGNAL MONITOR ROOM I ── */
 function submitSignalR1() {
   const v = document.getElementById('signal-r1')?.value.trim();
-  if (!v || v.length < 15) { showFeedback('fb-r1-sig','warn','Articulate your signal analysis in at least one full sentence.'); recordFailsafeAttempt(1, 'r1-proceed', 'Continue to Room II', 2, null); document.getElementById('signal-r1')?.focus(); return; }
+  if (!v || v.length < 15) { showFeedback('fb-r1-sig','warn','Articulate your signal analysis in at least one full sentence.'); document.getElementById('signal-r1')?.focus(); return; }
   S.r1.claimSubmitted = true;
   if (typeof postToSheets === 'function') postToSheets({ action: 'room_response', room: 1, detail: { taskId: 'R1_SIG_ANALYSIS', taskLabel: 'Signal Monitor analysis', responseType: 'open_text', responseText: v, standards: 'APUSH KC-7.3.I, AS-4', skillCategory: 'Sourcing' } });
   showFeedback('fb-r1-sig','ok','Signal analysis recorded. You may proceed to Room II.');
