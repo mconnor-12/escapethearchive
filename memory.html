@@ -2996,6 +2996,40 @@ body.has-sticky { padding-bottom: 60px; }
     </div>
   </div>
 
+  <!-- GAME SHELL -->
+  <div id="game-shell" style="display:none;">
+
+  <!-- ROLE SELECTION SCREEN -->
+  <div id="role-screen">
+    <div class="role-screen-inner">
+      <p class="role-screen-eyebrow">Select your role to enter</p>
+      <h2 class="role-screen-title">Who are you in the archive?</h2>
+      <p class="role-screen-sub">Each role asks a different first question. You will see different tasks at key moments. Choose deliberately.</p>
+      <div class="role-grid">
+        <button class="role-card" onclick="selectRole('lead', this)">
+          <span class="role-icon">&#128269;</span>
+          <span class="role-name">Lead Auditor</span>
+          <span class="role-q">"Does the record say what it claims to say?"</span>
+        </button>
+        <button class="role-card" onclick="selectRole('keeper', this)">
+          <span class="role-icon">&#128193;</span>
+          <span class="role-name">Evidence Keeper</span>
+          <span class="role-q">"What is here, and what is missing?"</span>
+        </button>
+        <button class="role-card" onclick="selectRole('analyst', this)">
+          <span class="role-icon">&#128065;&#65039;</span>
+          <span class="role-name">Archive Analyst</span>
+          <span class="role-q">"What does the record refuse to say?"</span>
+        </button>
+        <button class="role-card" onclick="selectRole('signal', this)">
+          <span class="role-icon">&#128225;</span>
+          <span class="role-name">Signal Monitor</span>
+          <span class="role-q">"Which signals are shaping your trust?"</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- GAME AREA -->
   <div id="game-area" style="display:none;">
     <div class="room-header" role="banner">
