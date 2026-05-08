@@ -741,22 +741,8 @@ function tagSource(el, sourceId, trust) {
     if (zone && zone.hasAttribute('hidden')) {
       // Show rationale check before revealing limitation zone
       const rat = document.getElementById('rat-container-r2');
-      if (rat && !MASTERY.r2_sources.passed) {
-        const ratedKeys = Object.keys(_r2Tagged);
-        showRationaleCheck('rat-container-r2',
-          ratedKeys,
-          'r2_sources',
-          function() {
-            zone.removeAttribute('hidden');
-            setTimeout(() => zone.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-          },
-          function() { resetSourceLevel(); }
-        );
-        setTimeout(() => rat.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-      } else {
-        zone.removeAttribute('hidden');
-        setTimeout(() => zone.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-      }
+      zone.removeAttribute('hidden');
+      setTimeout(() => zone.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
     }
   }
 }
