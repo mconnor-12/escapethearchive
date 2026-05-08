@@ -821,22 +821,8 @@ function rateSignal(el, sigId, verdict) {
     const zone = document.getElementById('r4-reflect-zone');
     const rat  = document.getElementById('rat-container-r4');
     if (zone && zone.hasAttribute('hidden')) {
-      if (rat && !MASTERY.r4_signals.passed) {
-        const ratedKeys = Object.keys(_r4Rated);
-        showRationaleCheck('rat-container-r4',
-          ratedKeys,
-          'r4_signals',
-          function() {
-            zone.removeAttribute('hidden');
-            setTimeout(() => zone.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-          },
-          function() { resetSignalLevel(); }
-        );
-        setTimeout(() => rat.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-      } else {
-        zone.removeAttribute('hidden');
-        setTimeout(() => zone.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-      }
+      zone.removeAttribute('hidden');
+      setTimeout(() => zone.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
     }
   }
 }
@@ -1866,8 +1852,9 @@ function scoreRationaleCheck(masteryKey, correctsEncoded) {
     showMiniScore('+15', 'Rationale passed');
     setTimeout(() => onPassFn(), 1200);
   } else {
-    if (scoreEl) scoreEl.innerHTML = `<span class="rat-fail">✗ ${pct}% — need ${Math.round(PASS_THRESHOLD*100)}% to proceed. Try this level again.</span>`;
-    setTimeout(() => onFailFn(), 2000);
+    if (scoreEl) scoreEl.innerHTML = `<span class="rat-fail">✗ ${pct}%</span>`;
+    showToast('You got ' + pct + '%. Need 70% to continue. Take another look and try again.', 4000);
+    setTimeout(() => onFailFn(), 3500);
   }
 
   logEvent('rationale_check', { masteryKey, score, attempt: m.attempts });
